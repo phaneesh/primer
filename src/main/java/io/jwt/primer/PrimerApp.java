@@ -17,7 +17,6 @@
 package io.jwt.primer;
 
 import com.codahale.metrics.health.HealthCheck;
-import com.google.common.base.Charsets;
 import com.hystrix.configurator.core.HystrixConfigutationFactory;
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;

@@ -24,7 +24,6 @@ import io.jwt.primer.config.AerospikeConfig;
 import io.jwt.primer.exception.PrimerException;
 import io.jwt.primer.model.ServiceUser;
 import io.jwt.primer.model.VerifyResponse;
-import org.joda.time.DateTime;
 
 import javax.ws.rs.core.Response;
 import java.time.Instant;

@@ -20,10 +20,6 @@ import com.aerospike.client.Bin;
 import com.aerospike.client.Key;
 import com.github.toastshaman.dropwizard.auth.jwt.hmac.HmacSHA512Signer;
 import com.github.toastshaman.dropwizard.auth.jwt.model.JsonWebToken;
-import com.github.toastshaman.dropwizard.auth.jwt.model.JsonWebTokenClaim;
-import com.github.toastshaman.dropwizard.auth.jwt.model.JsonWebTokenHeader;
-import com.google.common.base.Charsets;
-import com.google.common.hash.Hashing;
 import com.hystrix.configurator.core.BaseCommand;
 import io.jwt.primer.aeroapike.AerospikeConnectionManager;
 import io.jwt.primer.config.AerospikeConfig;
@@ -31,8 +27,6 @@ import io.jwt.primer.config.JwtConfig;
 import io.jwt.primer.model.ServiceUser;
 import io.jwt.primer.model.TokenResponse;
 import io.jwt.primer.util.TokenUtil;
-import lombok.val;
-import org.joda.time.DateTime;
 
 /**
  * @author phaneesh
