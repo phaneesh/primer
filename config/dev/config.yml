@@ -1,0 +1,58 @@
+server:
+  applicationConnectors:
+    - type: http
+      port: 8080
+  adminConnectors:
+    - type: http
+      port: 9081
+
+# Logging settings.
+logging:
+  level: INFO
+  # Logger-specific levels.
+  loggers:
+    # Sets the level for 'com.example.app' to DEBUG.
+    io.jwt.primer: DEBUG
+  appenders:
+    - type: console
+      threshold: INFO
+
+swagger:
+  resourcePackage: io.jwt.primer.resource
+  title: Primer
+  description: Low latency & interet scale JWT service
+
+aerospike:
+  hosts: "localhost:3000"
+  namespace: primer
+  maxConnectionsPerNode: 5
+  timeout: 1000
+  retries: 3
+  sleepBetweenRetries: 100
+
+hystrix:
+  defaultConfig:
+    threadPool:
+      timeout: 1000
+  commands:
+    - name: generate
+      threadPool:
+        timeout: 1000
+        concurrency: 4
+    - name: disable
+      threadPool:
+        timeout: 1000
+        concurrency: 4
+    - name: verify
+      threadPool:
+        timeout: 1000
+        concurrency: 4
+    - name: refresh
+      threadPool:
+        timeout: 1000
+        concurrency: 4
+
+jwt:
+  privateKey: uL05wFbgtsW1IFRHOpIGn7PjLLwm1RiIDWubO4UqAU1OS4VhU6nnaIiJITLQ2Rqa
+  clockSkew: 60
+  expiry: 600

@@ -1,0 +1,57 @@
+server:
+  applicationConnectors:
+    - type: http
+      port: 8080
+  adminConnectors:
+    - type: http
+      port: 8081
+
+# Logging settings.
+logging:
+  level: INFO
+  # Logger-specific levels.
+  loggers:
+    io.jwt.primer: DEBUG
+  appenders:
+    - type: console
+      threshold: INFO
+
+swagger:
+  resourcePackage: io.jwt.primer.resource
+  title: Primer
+  description: Low latency & interet scale JWT service
+
+aerospike:
+  hosts: ${AEROSPIKE_HOST}
+  namespace: ${AEROSPIKE_NAMESPACE}
+  maxConnectionsPerNode: ${AEROSPIKE_CONNECTION_PER_NODE}
+  timeout: ${AEROSPIKE_TIMEOUT}
+  retries: ${AEROSPIKE_RETRIES}
+  sleepBetweenRetries: ${AEROSPIKE_SLEEP_BETWEEN_RETRIES}
+
+hystrix:
+  defaultConfig:
+    threadPool:
+      timeout: 1000
+  commands:
+    - name: generate
+      threadPool:
+        timeout: 1000
+        concurrency: 2
+    - name: disable
+      threadPool:
+        timeout: 1000
+        concurrency: 1
+    - name: verify
+      threadPool:
+        timeout: 1000
+        concurrency: 4
+    - name: refresh
+      threadPool:
+        timeout: 1000
+        concurrency: 2
+
+jwt:
+  privateKey: ${JWT_PRIVATE_KEY}
+  clockSkew: ${JWT_CLOCK_SKEW}
+  expiry: ${JWT_EXPIRY}

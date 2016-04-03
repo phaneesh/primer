@@ -1,0 +1,35 @@
+aerospike:
+  image: aerospike
+  hostname: aerospike
+  ports:
+    - "3000:3000"
+  volumes:
+   - "$PWD/config/aerospike:/opt/aerospike/etc"
+
+
+#heimdall compose
+primer:
+  container_name: primer
+  build: .
+  ports:
+   - "8080:8080"
+   - "8081:8081"
+  volumes:
+   - /var/log/primer
+  links:
+   - aerospike
+# enviroment valiables
+  environment:
+   - GC_ALGO=UseG1GC
+   - JAVA_PROCESS_MIN_HEAP=512m
+   - JAVA_PROCESS_MAX_HEAP=512m
+   - CONFIG_ENV=stage
+   - AEROSPIKE_HOST=aerospike:3000
+   - AEROSPIKE_NAMESPACE=test
+   - AEROSPIKE_CONNECTION_PER_NODE=5
+   - AEROSPIKE_TIMEOUT=1000
+   - AEROSPIKE_RETRIES=3
+   - AEROSPIKE_SLEEP_BETWEEN_RETRIES=100
+   - JWT_PRIVATE_KEY=uL05wFbgtsW1IFRHOpIGn7PjLLwm1RiIDWubO4UqAU1OS4VhU6nnaIiJITLQ2Rqa
+   - JWT_CLOCK_SKEW=60
+   - JWT_EXPIRY=3600
