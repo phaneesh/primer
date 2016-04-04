@@ -106,15 +106,15 @@ public class TokenResource {
             @ApiResponse(code = 200, response = VerifyResponse.class, message = "Success"),
             @ApiResponse(code = 401, response = PrimerError.class, message = "Unauthorized"),
             @ApiResponse(code = 404, response = PrimerError.class, message = "Not Found"),
-            @ApiResponse(code = 403, response = PrimerError.class, message = "Unauthorized"),
+            @ApiResponse(code = 403, response = PrimerError.class, message = "Forbidden"),
             @ApiResponse(code = 412, response = PrimerError.class, message = "Expired"),
             @ApiResponse(code = 500, response = PrimerError.class, message = "Error")
     })
     @Metered
-    public VerifyResponse verify(@HeaderParam("X-Auth-Token") String token, @PathParam("id") String id,
-                                 @PathParam("app") String app, @Valid ServiceUser user) throws PrimerException {
+    public VerifyResponse verify(@HeaderParam("X-Auth-Token") String token, @PathParam("app") String app,
+                                 @PathParam("id") String id, @Valid ServiceUser user) throws PrimerException {
         try {
-            VerifyCommand verifyCommand = new VerifyCommand(aerospikeConfig, token, id, app, user);
+            VerifyCommand verifyCommand = new VerifyCommand(aerospikeConfig, jwtConfig, token, id, app, user);
             return verifyCommand.queue().get();
         } catch (Exception e) {
             if(ExceptionUtils.getRootCause(e) instanceof PrimerException) {
@@ -128,9 +128,8 @@ public class TokenResource {
     @Path("/v1/refresh/{app}/{id}")
     @ApiOperation(value = "Refresh the token for a given user")
     public RefreshResponse refresh(@HeaderParam("X-Auth-Token") String token,
-                                   @HeaderParam("X-Refresh-Token") String refresh,
-                                   @PathParam("id") String id,
-                                   @PathParam("app") String app) throws PrimerException {
+                                   @HeaderParam("X-Refresh-Token") String refresh, @PathParam("app") String app,
+                                   @PathParam("id") String id) throws PrimerException {
 
         try {
             RefreshCommand refreshCommand = new RefreshCommand(signer, jwtConfig, aerospikeConfig,

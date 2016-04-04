@@ -18,8 +18,10 @@ package io.jwt.primer.resource;
 
 import io.dropwizard.testing.junit.ResourceTestRule;
 import io.jwt.primer.BaseTest;
+import io.jwt.primer.model.RefreshResponse;
 import io.jwt.primer.model.ServiceUser;
 import io.jwt.primer.model.TokenResponse;
+import io.jwt.primer.model.VerifyResponse;
 import org.junit.ClassRule;
 import org.junit.Test;
 
@@ -51,5 +53,47 @@ public class TokenResourceTest extends BaseTest {
         assertNotNull(result.getToken());
         assertNotNull(result.getRefreshToken());
     }
+
+    @Test
+    public void testVerifyToken() {
+        Entity<ServiceUser> serviceUserEntity = Entity.json(
+                ServiceUser.builder()
+                        .id("test")
+                        .name("test")
+                        .role("user")
+                        .build());
+        TokenResponse result = resources.client().target("/v1/generate/test").request()
+                .header("X-User-Id", "test")
+                .post(serviceUserEntity, TokenResponse.class);
+        assertNotNull(result.getToken());
+        assertNotNull(result.getRefreshToken());
+        VerifyResponse verifyResponse = resources.client().target("/v1/verify/test/test").request()
+                .header("X-Auth-Token", result.getToken())
+                .post(serviceUserEntity, VerifyResponse.class);
+        assertNotNull(verifyResponse.getToken());
+    }
+
+
+    @Test
+    public void testRefreshToken() {
+        Entity<ServiceUser> serviceUserEntity = Entity.json(
+                ServiceUser.builder()
+                        .id("test1")
+                        .name("test1")
+                        .role("user")
+                        .build());
+        TokenResponse result = resources.client().target("/v1/generate/test").request()
+                .header("X-User-Id", "test1")
+                .post(serviceUserEntity, TokenResponse.class);
+        assertNotNull(result.getToken());
+        assertNotNull(result.getRefreshToken());
+        RefreshResponse refreshResponse = resources.client().target("/v1/refresh/test/test1").request()
+                .header("X-Auth-Token", result.getToken())
+                .header("X-Refresh-Token", result.getRefreshToken())
+                .post(null, RefreshResponse.class);
+        assertNotNull(refreshResponse.getToken());
+        assertNotNull(refreshResponse.getRefreshToken());
+    }
+
 
 }

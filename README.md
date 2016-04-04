@@ -8,7 +8,7 @@ Primer is build on Java 8 & compiles only on Java 8
 * dropwizard
 * Hystrix
 * Aerospike
-
+* [mock-aerospike](https://github.com/srini156/mock-aersopike) 
 ## Usage
 This service can be used as the token store which can be used to verify and validate the claims by api client.
 More about JWT [here](https://jwt.io/)   

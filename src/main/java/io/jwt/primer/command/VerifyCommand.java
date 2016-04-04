@@ -21,6 +21,7 @@ import com.aerospike.client.Record;
 import com.hystrix.configurator.core.BaseCommand;
 import io.jwt.primer.aeroapike.AerospikeConnectionManager;
 import io.jwt.primer.config.AerospikeConfig;
+import io.jwt.primer.config.JwtConfig;
 import io.jwt.primer.exception.PrimerException;
 import io.jwt.primer.model.ServiceUser;
 import io.jwt.primer.model.VerifyResponse;
@@ -35,6 +36,8 @@ public class VerifyCommand extends BaseCommand<VerifyResponse> {
 
     private final AerospikeConfig aerospikeConfig;
 
+    private final JwtConfig jwtConfig;
+
     private final String token;
 
     private final String id;
@@ -43,10 +46,11 @@ public class VerifyCommand extends BaseCommand<VerifyResponse> {
 
     private final ServiceUser user;
 
-    public VerifyCommand(final AerospikeConfig aerospikeConfig, final String token,
+    public VerifyCommand(final AerospikeConfig aerospikeConfig, final JwtConfig jwtConfig, final String token,
                          final String id, final String app, final ServiceUser user) {
         super("verify");
         this.aerospikeConfig = aerospikeConfig;
+        this.jwtConfig = jwtConfig;
         this.token = token;
         this.id = id;
         this.app = app;
@@ -68,7 +72,7 @@ public class VerifyCommand extends BaseCommand<VerifyResponse> {
         final String name = record.getString("name");
         final String fetchedToken = record.getString("token");
         final long expires_at = record.getLong("expires_at");
-        if(expires_at <= Instant.now().getEpochSecond()) {
+        if(expires_at >= Instant.now().plusSeconds(jwtConfig.getClockSkew()).getEpochSecond()) {
             throw new PrimerException(Response.Status.PRECONDITION_FAILED, "PR003", "Expired");
         }
 
