@@ -245,7 +245,7 @@
                         <artifactId>docker-maven-plugin</artifactId>
                         <version>0.4.0</version>
                         <configuration>
-                            <imageName>docker.phonepe.com:5000/heimdall-service:${project.version}</imageName>
+                            <imageName>docker.phonepe.com:5000/primer-service:${project.version}</imageName>
                             <dockerDirectory>${project.basedir}</dockerDirectory>
                             <serverId>phonepe-docker</serverId>
                             <registryUrl>http://docker.phonepe.com:5000/</registryUrl>
