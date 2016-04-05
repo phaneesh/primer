@@ -21,6 +21,8 @@ import com.hystrix.configurator.core.HystrixConfigutationFactory;
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
+import io.dropwizard.discovery.bundle.ServiceDiscoveryBundle;
+import io.dropwizard.discovery.bundle.ServiceDiscoveryConfiguration;
 import io.dropwizard.lifecycle.Managed;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
@@ -35,6 +37,8 @@ import org.zapodot.hystrix.bundle.HystrixBundle;
  * @author phaneesh
  */
 public class PrimerApp extends Application<PrimerConfiguration> {
+
+    private static ServiceDiscoveryBundle<PrimerConfiguration> serviceDiscoveryBundle;
 
     public static void main(String[] args) throws Exception {
         PrimerApp primerApp = new PrimerApp();
@@ -55,6 +59,27 @@ public class PrimerApp extends Application<PrimerConfiguration> {
                 return configuration.getSwagger();
             }
         });
+        serviceDiscoveryBundle = new ServiceDiscoveryBundle<PrimerConfiguration>() {
+            @Override
+            protected ServiceDiscoveryConfiguration getRangerConfiguration(PrimerConfiguration configuration) {
+                return configuration.getServiceDiscoveryConfiguration();
+            }
+
+            @Override
+            protected String getServiceName(PrimerConfiguration configuration) {
+                return "primer";
+            }
+
+            @Override
+            protected int getPort(PrimerConfiguration configuration) {
+                return Integer.parseInt(System.getenv("PORT_8080"));
+            }
+
+            protected String getHost() {
+                return System.getenv("HOST");
+            }
+        };
+        bootstrap.addBundle(serviceDiscoveryBundle);
     }
     @Override
     public void run(PrimerConfiguration configuration, Environment environment) throws Exception {
