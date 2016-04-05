@@ -19,6 +19,7 @@ package io.jwt.primer;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hystrix.configurator.config.HystrixConfig;
 import io.dropwizard.Configuration;
+import io.dropwizard.discovery.bundle.ServiceDiscoveryConfiguration;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import io.jwt.primer.config.AerospikeConfig;
 import io.jwt.primer.config.JwtConfig;
@@ -46,5 +47,10 @@ public class PrimerConfiguration extends Configuration {
     @Getter
     @Setter
     private JwtConfig jwtConfig;
+
+    @JsonProperty("discovery")
+    @Getter
+    @Setter
+    private ServiceDiscoveryConfiguration serviceDiscoveryConfiguration;
 
 }

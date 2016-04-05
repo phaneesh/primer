@@ -58,6 +58,7 @@
         <lombok.maven.version>1.16.6.1</lombok.maven.version>
         <dropwizard.version>0.9.2</dropwizard.version>
         <dropwizard.swagger.version>0.9.2-1</dropwizard.swagger.version>
+        <dropwizard.servicediscovery>0.9.2-SNAPSHOT</dropwizard.servicediscovery>
         <hystrix.dropwizard.version>0.4</hystrix.dropwizard.version>
         <hystrix.configurator.version>0.0.3</hystrix.configurator.version>
         <aerospike.version>3.2.1</aerospike.version>
@@ -86,6 +87,11 @@
             <groupId>com.github.toastshaman</groupId>
             <artifactId>dropwizard-auth-jwt</artifactId>
             <version>${dropwizard-auth-jwt.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard.discovery</groupId>
+            <artifactId>dropwizard-service-discovery-bundle</artifactId>
+            <version>${dropwizard.servicediscovery}</version>
         </dependency>
         <dependency>
             <groupId>com.hystrix</groupId>
