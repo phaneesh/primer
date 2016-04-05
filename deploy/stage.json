@@ -19,7 +19,7 @@
   "container": {
     "type": "DOCKER",
     "docker": {
-      "image": "docker.phonepe.com:5000/primer-service:0.0.1-SNAPSHOT",
+      "image": "docker.phonepe.com:5000/primer-service:1.0-SNAPSHOT",
       "network": "BRIDGE",
       "portMappings": [
         {
