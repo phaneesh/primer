@@ -95,6 +95,7 @@ public class TokenResource {
             DisableCommand disableCommand = new DisableCommand(aerospikeConfig, id, app);
             return disableCommand.queue().get();
         } catch (Exception e) {
+            log.error("Error disabling token", e);
             throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR000", e.getMessage());
         }
     }
@@ -117,6 +118,7 @@ public class TokenResource {
             VerifyCommand verifyCommand = new VerifyCommand(aerospikeConfig, jwtConfig, token, id, app, user);
             return verifyCommand.queue().get();
         } catch (Exception e) {
+            log.error("Error verifying token", e);
             if(ExceptionUtils.getRootCause(e) instanceof PrimerException) {
                 throw (PrimerException)ExceptionUtils.getRootCause(e);
             }
@@ -136,6 +138,7 @@ public class TokenResource {
                     id, app, token, refresh);
             return refreshCommand.queue().get();
         } catch (Exception e) {
+            log.error("Error refreshing token", e);
             if(ExceptionUtils.getRootCause(e) instanceof PrimerException) {
                 throw (PrimerException)ExceptionUtils.getRootCause(e);
             }
