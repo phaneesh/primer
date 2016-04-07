@@ -69,10 +69,10 @@ public class RefreshCommand extends BaseCommand<RefreshResponse> {
         final Key key = new Key(aerospikeConfig.getNamespace(), String.format("%s_tokens", app), id);
         final Record record = AerospikeConnectionManager.getClient().get(null, key, "token", "subject", "enabled", "refresh_token", "role", "name");
         if (null == record) {
-            throw new PrimerException(Response.Status.NOT_FOUND, "PR001", "Not Found");
+            throw new PrimerException(Response.Status.NOT_FOUND.getStatusCode(), "PR001", "Not Found");
         }
         if(!record.getBoolean("enabled")) {
-            throw new PrimerException(Response.Status.FORBIDDEN, "PR002", "Forbidden");
+            throw new PrimerException(Response.Status.FORBIDDEN.getStatusCode(), "PR002", "Forbidden");
         }
         final String fetchedToken = record.getString("token");
         final String fetchedRefreshToken = record.getString("refresh_token");
@@ -97,7 +97,7 @@ public class RefreshCommand extends BaseCommand<RefreshResponse> {
                     .expiresAt(newToken.claim().expiration())
                     .build();
         } else {
-            throw new PrimerException(Response.Status.UNAUTHORIZED, "PR004", "Unauthorized");
+            throw new PrimerException(Response.Status.UNAUTHORIZED.getStatusCode(), "PR004", "Unauthorized");
         }
     }
 }

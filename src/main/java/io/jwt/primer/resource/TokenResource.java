@@ -77,7 +77,7 @@ public class TokenResource {
             return generateCommand.queue().get();
         } catch (Exception e) {
             log.error("Error generating token", e);
-            throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR, "PR000", e.getMessage());
+            throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR000", e.getMessage());
         }
     }
 
@@ -95,7 +95,7 @@ public class TokenResource {
             DisableCommand disableCommand = new DisableCommand(aerospikeConfig, id, app);
             return disableCommand.queue().get();
         } catch (Exception e) {
-            throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR, "PR000", e.getMessage());
+            throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR000", e.getMessage());
         }
     }
 
@@ -120,7 +120,7 @@ public class TokenResource {
             if(ExceptionUtils.getRootCause(e) instanceof PrimerException) {
                 throw (PrimerException)ExceptionUtils.getRootCause(e);
             }
-            throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR, "PR001", "Error");
+            throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR001", "Error");
         }
     }
 
@@ -139,7 +139,7 @@ public class TokenResource {
             if(ExceptionUtils.getRootCause(e) instanceof PrimerException) {
                 throw (PrimerException)ExceptionUtils.getRootCause(e);
             }
-            throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR, "PR001", "Error");
+            throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR001", "Error");
         }
     }
 

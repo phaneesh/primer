@@ -64,10 +64,10 @@ public class VerifyCommand extends BaseCommand<VerifyResponse> {
         final Key key = new Key(aerospikeConfig.getNamespace(), String.format("%s_tokens", app), id);
         final Record record = AerospikeConnectionManager.getClient().get(null, key, "token", "subject", "enabled", "role", "name", "expires_at");
         if (null == record) {
-            throw new PrimerException(Response.Status.NOT_FOUND, "PR001", "Not Found");
+            throw new PrimerException(Response.Status.NOT_FOUND.getStatusCode(), "PR001", "Not Found");
         }
         if(!record.getBoolean("enabled")) {
-            throw new PrimerException(Response.Status.FORBIDDEN, "PR002", "Forbidden");
+            throw new PrimerException(Response.Status.FORBIDDEN.getStatusCode(), "PR002", "Forbidden");
         }
         final String subject = record.getString("subject");
         final String role = record.getString("role");
@@ -79,7 +79,7 @@ public class VerifyCommand extends BaseCommand<VerifyResponse> {
         log.info("Expires At: {} | Clock Skew: {} | Adjusted: {} | Now: {}",
                 expires_at, jwtConfig.getClockSkew(), adjusted, now);
         if(now >= adjusted  ) {
-            throw new PrimerException(Response.Status.PRECONDITION_FAILED, "PR003", "Expired");
+            throw new PrimerException(Response.Status.PRECONDITION_FAILED.getStatusCode(), "PR003", "Expired");
         }
         if(token.equals(fetchedToken) && user.getId().equals(subject)
                 && user.getName().equals(name) && user.getRole().equals(role)) {
@@ -89,7 +89,7 @@ public class VerifyCommand extends BaseCommand<VerifyResponse> {
                     .userId(subject)
                     .build();
         } else {
-            throw new PrimerException(Response.Status.UNAUTHORIZED, "PR004", "Unauthorized");
+            throw new PrimerException(Response.Status.UNAUTHORIZED.getStatusCode(), "PR004", "Unauthorized");
         }
     }
 }
