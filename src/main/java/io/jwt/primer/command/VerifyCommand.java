@@ -78,7 +78,7 @@ public class VerifyCommand extends BaseCommand<VerifyResponse> {
         final long now = Instant.now().getEpochSecond();
         log.info("Expires At: {} | Clock Skew: {} | Adjusted: {} | Now: {}",
                 expires_at, jwtConfig.getClockSkew(), adjusted, now);
-        if(now >= adjusted) {
+        if(now >= adjusted  ) {
             throw new PrimerException(Response.Status.PRECONDITION_FAILED, "PR003", "Expired");
         }
         if(token.equals(fetchedToken) && user.getId().equals(subject)
