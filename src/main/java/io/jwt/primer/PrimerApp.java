@@ -81,6 +81,7 @@ public class PrimerApp extends Application<PrimerConfiguration> {
         };
         bootstrap.addBundle(serviceDiscoveryBundle);
     }
+
     @Override
     public void run(PrimerConfiguration configuration, Environment environment) throws Exception {
         HystrixConfigutationFactory.init(configuration.getHystrixConfig());
