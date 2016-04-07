@@ -72,10 +72,9 @@ public class VerifyCommand extends BaseCommand<VerifyResponse> {
         final String name = record.getString("name");
         final String fetchedToken = record.getString("token");
         final long expires_at = record.getLong("expires_at");
-        if(expires_at >= Instant.now().plusSeconds(jwtConfig.getClockSkew()).getEpochSecond()) {
+        if(Instant.ofEpochSecond(expires_at).plusSeconds(jwtConfig.getClockSkew()).getEpochSecond() >= Instant.now().getEpochSecond()) {
             throw new PrimerException(Response.Status.PRECONDITION_FAILED, "PR003", "Expired");
         }
-
         if(token.equals(fetchedToken) && user.getId().equals(subject)
                 && user.getName().equals(name) && user.getRole().equals(role)) {
             return VerifyResponse.builder()
