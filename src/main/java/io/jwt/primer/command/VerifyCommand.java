@@ -25,6 +25,7 @@ import io.jwt.primer.config.JwtConfig;
 import io.jwt.primer.exception.PrimerException;
 import io.jwt.primer.model.ServiceUser;
 import io.jwt.primer.model.VerifyResponse;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.ws.rs.core.Response;
 import java.time.Instant;
@@ -32,6 +33,7 @@ import java.time.Instant;
 /**
  * @author phaneesh
  */
+@Slf4j
 public class VerifyCommand extends BaseCommand<VerifyResponse> {
 
     private final AerospikeConfig aerospikeConfig;
@@ -72,7 +74,11 @@ public class VerifyCommand extends BaseCommand<VerifyResponse> {
         final String name = record.getString("name");
         final String fetchedToken = record.getString("token");
         final long expires_at = record.getLong("expires_at");
-        if(Instant.ofEpochSecond(expires_at).plusSeconds(jwtConfig.getClockSkew()).getEpochSecond() >= Instant.now().getEpochSecond()) {
+        final long adjusted = Instant.ofEpochSecond(expires_at).plusSeconds(jwtConfig.getClockSkew()).getEpochSecond();
+        final long now = Instant.now().getEpochSecond();
+        log.info("Expires At: {} | Clock Skew: {} | Adjusted: {} | Now: {}",
+                expires_at, jwtConfig.getClockSkew(), adjusted, now);
+        if(adjusted >= now) {
             throw new PrimerException(Response.Status.PRECONDITION_FAILED, "PR003", "Expired");
         }
         if(token.equals(fetchedToken) && user.getId().equals(subject)
