@@ -59,7 +59,7 @@ public class GenerateCommand extends BaseCommand<TokenResponse> {
 
     @Override
     protected TokenResponse run()  {
-        final JsonWebToken token = TokenUtil.token(app, id, user.getRole(), user.getName(), jwtConfig);
+        final JsonWebToken token = TokenUtil.token(app, id, user, jwtConfig);
         final String signedToken = signer.sign(token);
         final String refreshToken = TokenUtil.refreshToken(app, id, jwtConfig, token);
         final Key key = new Key(aerospikeConfig.getNamespace(), String.format("%s_tokens", app), id);

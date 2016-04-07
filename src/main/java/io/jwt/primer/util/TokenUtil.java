@@ -22,6 +22,7 @@ import com.github.toastshaman.dropwizard.auth.jwt.model.JsonWebTokenHeader;
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
 import io.jwt.primer.config.JwtConfig;
+import io.jwt.primer.model.ServiceUser;
 import lombok.val;
 import org.joda.time.DateTime;
 
@@ -30,7 +31,7 @@ import org.joda.time.DateTime;
  */
 public class TokenUtil {
 
-    public static JsonWebToken token(final String app, final String id, final String role, final String name,
+    public static JsonWebToken token(final String app, final String id, final ServiceUser serviceUser,
                                      final JwtConfig jwtConfig) {
         return JsonWebToken.builder()
                 .header(JsonWebTokenHeader.HS512())
@@ -40,8 +41,9 @@ public class TokenUtil {
                                 .issuer(app)
                                 .subject(id)
                                 .expiration(DateTime.now().plusSeconds(jwtConfig.getExpiry()))
-                                .param("role" , role)
-                                .param("name", name)
+                                .param("user_id" , serviceUser.getId())
+                                .param("role" , serviceUser.getRole())
+                                .param("name", serviceUser.getName())
                                 .build()
                 ).build();
     }
