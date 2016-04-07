@@ -79,7 +79,7 @@ public class RefreshCommand extends BaseCommand<RefreshResponse> {
         final String fetchedRefreshToken = record.getString("refresh_token");
         if(fetchedToken.equals(token) && fetchedRefreshToken.equals(refreshToken)) {
             final ServiceUser serviceUser = ServiceUser.builder()
-                    .id(record.getString("user_id"))
+                    .id(record.getString("subject"))
                     .role(record.getString("role"))
                     .name(record.getString("name"))
                     .build();
