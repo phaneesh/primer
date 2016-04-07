@@ -28,6 +28,7 @@ import io.jwt.primer.config.AerospikeConfig;
 import io.jwt.primer.config.JwtConfig;
 import io.jwt.primer.exception.PrimerException;
 import io.jwt.primer.model.RefreshResponse;
+import io.jwt.primer.model.ServiceUser;
 import io.jwt.primer.util.TokenUtil;
 
 import javax.ws.rs.core.Response;
@@ -77,9 +78,12 @@ public class RefreshCommand extends BaseCommand<RefreshResponse> {
         final String fetchedToken = record.getString("token");
         final String fetchedRefreshToken = record.getString("refresh_token");
         if(fetchedToken.equals(token) && fetchedRefreshToken.equals(refreshToken)) {
-            final String role = record.getString("role");
-            final String name = record.getString("name");
-            final JsonWebToken newToken = TokenUtil.token(app, id, role, name, jwtConfig);
+            final ServiceUser serviceUser = ServiceUser.builder()
+                    .id(record.getString("user_id"))
+                    .role(record.getString("role"))
+                    .name(record.getString("name"))
+                    .build();
+            final JsonWebToken newToken = TokenUtil.token(app, id, serviceUser, jwtConfig);
             final String newRefreshToken = TokenUtil.refreshToken(app, id, jwtConfig, newToken);
             final String newSignedToken = signer.sign(newToken);
             final Bin tokenBin = new Bin("token", newSignedToken);
