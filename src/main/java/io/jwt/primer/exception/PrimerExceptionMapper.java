@@ -31,7 +31,7 @@ public class PrimerExceptionMapper implements ExceptionMapper<PrimerException> {
 
     @Override
     public Response toResponse(PrimerException exception) {
-        val errorData = PrimerError.builder()
+        final PrimerError errorData = PrimerError.builder()
                 .errorCode(exception.getErrorCode())
                 .message(exception.getMessage())
                 .build();
