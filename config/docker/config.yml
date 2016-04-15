@@ -36,24 +36,28 @@ hystrix:
   commands:
     - name: generate
       threadPool:
-        timeout: 1000
-        concurrency: 2
+        timeout: 200
+        concurrency: 4
     - name: disable
       threadPool:
-        timeout: 1000
-        concurrency: 1
+        timeout: 200
+        concurrency: 4
     - name: verify
       threadPool:
-        timeout: 1000
+        timeout: 100
         concurrency: 4
     - name: refresh
       threadPool:
-        timeout: 1000
-        concurrency: 2
+        timeout: 200
+        concurrency: 4
     - name: expire
       threadPool:
-        timeout: 1000
+        timeout: 100
         concurrency: 1
+    - name: get
+      threadPool:
+        timeout: 100
+        concurrency: 2
 
 
 jwt:
