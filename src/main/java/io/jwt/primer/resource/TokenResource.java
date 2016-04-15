@@ -19,10 +19,7 @@ package io.jwt.primer.resource;
 import com.codahale.metrics.annotation.Metered;
 import com.github.toastshaman.dropwizard.auth.jwt.hmac.HmacSHA512Signer;
 import com.google.common.base.Charsets;
-import io.jwt.primer.command.DisableCommand;
-import io.jwt.primer.command.GenerateCommand;
-import io.jwt.primer.command.RefreshCommand;
-import io.jwt.primer.command.VerifyCommand;
+import io.jwt.primer.command.*;
 import io.jwt.primer.config.AerospikeConfig;
 import io.jwt.primer.config.JwtConfig;
 import io.jwt.primer.exception.PrimerException;
@@ -94,6 +91,25 @@ public class TokenResource {
         try {
             DisableCommand disableCommand = new DisableCommand(aerospikeConfig, app, id);
             return disableCommand.queue().get();
+        } catch (Exception e) {
+            log.error("Error disabling token", e);
+            throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR000", e.getMessage());
+        }
+    }
+
+    @POST
+    @Path("/v1/disable/{app}/{id}")
+    @ApiOperation(value = "Expire a JWT token for given user")
+    @ApiResponses({
+            @ApiResponse(code = 200, response = TokenExpireResponse.class, message = "Success"),
+            @ApiResponse(code = 500, response = PrimerError.class, message = "Error"),
+    })
+    @Metered
+    public TokenExpireResponse expire(@PathParam("id") String id,
+                                        @PathParam("app") String app) throws PrimerException {
+        try {
+            ExpireCommand expireCommand = new ExpireCommand(aerospikeConfig, app, id);
+            return expireCommand.queue().get();
         } catch (Exception e) {
             log.error("Error disabling token", e);
             throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR000", e.getMessage());

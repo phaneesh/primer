@@ -50,6 +50,11 @@ hystrix:
       threadPool:
         timeout: 1000
         concurrency: 2
+    - name: expire
+      threadPool:
+        timeout: 1000
+        concurrency: 1
+
 
 jwt:
   privateKey: ${JWT_PRIVATE_KEY}
