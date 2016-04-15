@@ -93,6 +93,9 @@ public class TokenResource {
             return disableCommand.queue().get();
         } catch (Exception e) {
             log.error("Error disabling token", e);
+            if(ExceptionUtils.getRootCause(e) instanceof PrimerException) {
+                throw (PrimerException)ExceptionUtils.getRootCause(e);
+            }
             throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR000", e.getMessage());
         }
     }
@@ -102,6 +105,7 @@ public class TokenResource {
     @ApiOperation(value = "Expire a JWT token for given user")
     @ApiResponses({
             @ApiResponse(code = 200, response = TokenExpireResponse.class, message = "Success"),
+            @ApiResponse(code = 404, response = PrimerError.class, message = "Not Found"),
             @ApiResponse(code = 500, response = PrimerError.class, message = "Error"),
     })
     @Metered
@@ -112,6 +116,32 @@ public class TokenResource {
             return expireCommand.queue().get();
         } catch (Exception e) {
             log.error("Error disabling token", e);
+            if(ExceptionUtils.getRootCause(e) instanceof PrimerException) {
+                throw (PrimerException)ExceptionUtils.getRootCause(e);
+            }
+            throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR000", e.getMessage());
+        }
+    }
+
+    @GET
+    @Path("/v1/token/{app}/{id}")
+    @ApiOperation(value = "Get a JWT token for given user")
+    @ApiResponses({
+            @ApiResponse(code = 200, response = GetTokenResponse.class, message = "Success"),
+            @ApiResponse(code = 404, response = PrimerError.class, message = "Not Found"),
+            @ApiResponse(code = 500, response = PrimerError.class, message = "Error"),
+    })
+    @Metered
+    public GetTokenResponse get(@PathParam("id") String id,
+                                      @PathParam("app") String app) throws PrimerException {
+        try {
+            GetTokenCommand getTokenCommand = new GetTokenCommand(aerospikeConfig, app, id);
+            return getTokenCommand.queue().get();
+        } catch (Exception e) {
+            log.error("Error getting token", e);
+            if(ExceptionUtils.getRootCause(e) instanceof PrimerException) {
+                throw (PrimerException)ExceptionUtils.getRootCause(e);
+            }
             throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR000", e.getMessage());
         }
     }
