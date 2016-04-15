@@ -98,7 +98,7 @@ public class TokenResource {
     }
 
     @POST
-    @Path("/v1/disable/{app}/{id}")
+    @Path("/v1/expire/{app}/{id}")
     @ApiOperation(value = "Expire a JWT token for given user")
     @ApiResponses({
             @ApiResponse(code = 200, response = TokenExpireResponse.class, message = "Success"),
