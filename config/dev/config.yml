@@ -23,7 +23,7 @@ swagger:
   description: Low latency & interet scale JWT service
 
 aerospike:
-  hosts: "localhost:3000"
+  hosts: "stg-aerospike001:3000"
   namespace: primer
   maxConnectionsPerNode: 5
   timeout: 1000
@@ -57,7 +57,7 @@ hystrix:
         concurrency: 1
 
 jwt:
-  privateKey: uL05wFbgtsW1IFRHOpIGn7PjLLwm1RiIDWubO4UqAU1OS4VhU6nnaIiJITLQ2Rqa
+  privateKey: TwhjV5ujkvb41frpmqCve7ZfhqwSDMqOXe01DeDIsb2xCrW4bwfFnax9bi2uC9Kn
   clockSkew: 60
   expiry: 600
 

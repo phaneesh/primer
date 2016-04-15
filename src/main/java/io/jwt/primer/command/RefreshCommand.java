@@ -87,7 +87,7 @@ public class RefreshCommand extends BaseCommand<RefreshResponse> {
             final String newRefreshToken = TokenUtil.refreshToken(app, id, jwtConfig, newToken);
             final String newSignedToken = signer.sign(newToken);
             final Bin tokenBin = new Bin("token", newSignedToken);
-            final Bin refreshTokenBin = new Bin("refresh_token", refreshToken);
+            final Bin refreshTokenBin = new Bin("refresh_token", newRefreshToken);
             final Bin issuedAtBin = new Bin("issued_at", newToken.claim().issuedAt());
             final Bin expiresAtBin = new Bin("expires_at", newToken.claim().expiration());
             AerospikeConnectionManager.getClient().operate(null, key,
