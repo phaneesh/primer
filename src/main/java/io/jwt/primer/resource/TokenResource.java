@@ -92,7 +92,7 @@ public class TokenResource {
     public TokenDisableResponse disable(@PathParam("id") String id,
                                         @PathParam("app") String app) throws PrimerException {
         try {
-            DisableCommand disableCommand = new DisableCommand(aerospikeConfig, id, app);
+            DisableCommand disableCommand = new DisableCommand(aerospikeConfig, app, id);
             return disableCommand.queue().get();
         } catch (Exception e) {
             log.error("Error disabling token", e);
