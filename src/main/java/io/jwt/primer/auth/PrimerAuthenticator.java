@@ -19,12 +19,13 @@ package io.jwt.primer.auth;
 import com.github.toastshaman.dropwizard.auth.jwt.JsonWebTokenValidator;
 import com.github.toastshaman.dropwizard.auth.jwt.model.JsonWebToken;
 import com.github.toastshaman.dropwizard.auth.jwt.validator.ExpiryValidator;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import io.dropwizard.auth.AuthenticationException;
 import io.dropwizard.auth.Authenticator;
 import io.jwt.primer.model.ServiceUser;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Optional;
 
 
 /**
@@ -46,7 +47,7 @@ public class PrimerAuthenticator implements Authenticator<JsonWebToken, ServiceU
                 validator.validate(jsonWebToken);
             } catch (Throwable t) {
                 log.warn("Validation failed for token {}: {}", validator.getClass().getSimpleName(), t.getMessage());
-                return Optional.absent();
+                return Optional.empty();
             }
             log.info("Passed: {}", validator.getClass().getSimpleName());
         }
