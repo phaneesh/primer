@@ -66,6 +66,7 @@
         <aerospike.mock>0.0.5</aerospike.mock>
         <dropwizard-auth-jwt.version>0.9.2-0</dropwizard-auth-jwt.version>
         <junit.version>4.12</junit.version>
+        <wiremock.version>1.57</wiremock.version>
     </properties>
 
     <dependencies>

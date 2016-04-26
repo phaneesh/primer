@@ -48,8 +48,6 @@ public class PrimerConfiguration extends Configuration {
     @JsonProperty("jwt")
     private JwtConfig jwt;
 
-    private String staticPrivateKey;
-
     @JsonProperty("discovery")
     private ServiceDiscoveryConfiguration discovery;
 
