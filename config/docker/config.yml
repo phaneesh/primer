@@ -70,9 +70,6 @@ hystrix:
       threadPool:
         timeout: 100
         concurrency: 2
-
-staticPrivateKey: ${STATIC_PRIVATE_KEY}
-
 jwt:
   privateKey: ${JWT_PRIVATE_KEY}
   clockSkew: ${JWT_CLOCK_SKEW}

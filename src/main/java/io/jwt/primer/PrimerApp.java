@@ -105,7 +105,7 @@ public class PrimerApp extends Application<PrimerConfiguration> {
             }
         });
         environment.jersey().register(new TokenResource(configuration.getJwt(), configuration.getAerospike()));
-        environment.jersey().register(new StaticTokenResource(configuration.getStaticPrivateKey(), configuration.getAerospike()));
+        environment.jersey().register(new StaticTokenResource(configuration.getJwt().getPrivateKey(), configuration.getAerospike()));
         environment.jersey().register( new PrimerExceptionMapper());
     }
 }
