@@ -1,7 +1,7 @@
 {
   "id": "/primer",
   "cpus": 0.5,
-  "mem": 512,
+  "mem": 768,
   "portDefinitions": [
     {
       "port": 8080,
