@@ -362,6 +362,9 @@
                         <excludes>
                             <exclude>io/jwt/primer/model/**/*.class</exclude>
                             <exclude>io/jwt/primer/healthcheck/**/*.class</exclude>
+                            <exclude>io/jwt/primer/auth/**/*.class</exclude>
+                            <exclude>io/jwt/primer/config/**/*.class</exclude>
+                            <exclude>io/jwt/primer/exception/**/*.class</exclude>
                         </excludes>
                     </instrumentation>
                     <check>
