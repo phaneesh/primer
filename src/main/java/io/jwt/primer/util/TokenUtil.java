@@ -48,6 +48,20 @@ public class TokenUtil {
                 ).build();
     }
 
+    public static JsonWebToken token(final String app, final String id, final String role) {
+        return JsonWebToken.builder()
+                .header(JsonWebTokenHeader.HS512())
+                .claim(
+                        JsonWebTokenClaim.builder()
+                                .issuedAt(DateTime.now())
+                                .issuer(app)
+                                .subject(id)
+                                .expiration(DateTime.now().plusYears(1000))
+                                .param("role", role)
+                                .build()
+                ).build();
+    }
+
     public static String refreshToken(final String app, final String id, final JwtConfig jwtConfig,
                                       final JsonWebToken token) {
         val hasher = Hashing.murmur3_128().newHasher();

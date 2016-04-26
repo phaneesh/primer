@@ -46,6 +46,18 @@ hystrix:
       threadPool:
         timeout: 100
         concurrency: 4
+    - name: generate_static
+      threadPool:
+        timeout: 200
+        concurrency: 4
+    - name: disable_static
+      threadPool:
+        timeout: 200
+        concurrency: 4
+    - name: verify_static
+      threadPool:
+        timeout: 100
+        concurrency: 4
     - name: refresh
       threadPool:
         timeout: 200
@@ -59,6 +71,7 @@ hystrix:
         timeout: 100
         concurrency: 2
 
+staticPrivateKey: ${STATIC_PRIVATE_KEY}
 
 jwt:
   privateKey: ${JWT_PRIVATE_KEY}

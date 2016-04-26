@@ -47,6 +47,18 @@ hystrix:
       threadPool:
         timeout: 100
         concurrency: 4
+    - name: generate_static
+      threadPool:
+        timeout: 200
+        concurrency: 4
+    - name: disable_static
+      threadPool:
+        timeout: 200
+        concurrency: 4
+    - name: verify_static
+      threadPool:
+        timeout: 100
+        concurrency: 4
     - name: refresh
       threadPool:
         timeout: 200
@@ -59,6 +71,8 @@ hystrix:
       threadPool:
         timeout: 100
         concurrency: 1
+
+staticPrivateKey: Z4PWt27w2qkd2DPOHS3iI7PE8xnPPpvP82NDn3C79OeRJCsmmGmRKoNSXTjsqxrv
 
 jwt:
   privateKey: TwhjV5ujkvb41frpmqCve7ZfhqwSDMqOXe01DeDIsb2xCrW4bwfFnax9bi2uC9Kn

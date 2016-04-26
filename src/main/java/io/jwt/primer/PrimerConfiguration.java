@@ -25,32 +25,32 @@ import io.jwt.primer.config.AerospikeConfig;
 import io.jwt.primer.config.JwtConfig;
 import lombok.*;
 
+import javax.validation.Valid;
+
 /**
  * @author phaneesh
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class PrimerConfiguration extends Configuration {
 
+    @Valid
     private AerospikeConfig aerospike;
 
     private SwaggerBundleConfiguration swagger;
 
     @JsonProperty("hystrix")
-    @Getter
-    @Setter
     private HystrixConfig hystrixConfig;
 
     @JsonProperty("jwt")
-    @Getter
-    @Setter
     private JwtConfig jwtConfig;
 
+    private String staticPrivateKey;
+
     @JsonProperty("discovery")
-    @Getter
-    @Setter
     private ServiceDiscoveryConfiguration serviceDiscoveryConfiguration;
 
 }

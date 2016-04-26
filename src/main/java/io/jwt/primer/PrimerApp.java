@@ -30,6 +30,7 @@ import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import io.jwt.primer.aeroapike.AerospikeConnectionManager;
 import io.jwt.primer.exception.PrimerExceptionMapper;
+import io.jwt.primer.resource.StaticTokenResource;
 import io.jwt.primer.resource.TokenResource;
 import org.zapodot.hystrix.bundle.HystrixBundle;
 
@@ -104,6 +105,7 @@ public class PrimerApp extends Application<PrimerConfiguration> {
             }
         });
         environment.jersey().register(new TokenResource(configuration.getJwtConfig(), configuration.getAerospike()));
+        environment.jersey().register(new StaticTokenResource(configuration.getStaticPrivateKey(), configuration.getAerospike()));
         environment.jersey().register( new PrimerExceptionMapper());
     }
 }
