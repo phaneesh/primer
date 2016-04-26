@@ -63,7 +63,7 @@ public class PrimerApp extends Application<PrimerConfiguration> {
         serviceDiscoveryBundle = new ServiceDiscoveryBundle<PrimerConfiguration>() {
             @Override
             protected ServiceDiscoveryConfiguration getRangerConfiguration(PrimerConfiguration configuration) {
-                return configuration.getServiceDiscoveryConfiguration();
+                return configuration.getDiscovery();
             }
 
             @Override
@@ -85,7 +85,7 @@ public class PrimerApp extends Application<PrimerConfiguration> {
 
     @Override
     public void run(PrimerConfiguration configuration, Environment environment) throws Exception {
-        HystrixConfigutationFactory.init(configuration.getHystrixConfig());
+        HystrixConfigutationFactory.init(configuration.getHystrix());
         environment.lifecycle().manage(new Managed() {
             @Override
             public void start() throws Exception {
@@ -104,7 +104,7 @@ public class PrimerApp extends Application<PrimerConfiguration> {
                         HealthCheck.Result.healthy() : HealthCheck.Result.unhealthy("Aerospike connection error");
             }
         });
-        environment.jersey().register(new TokenResource(configuration.getJwtConfig(), configuration.getAerospike()));
+        environment.jersey().register(new TokenResource(configuration.getJwt(), configuration.getAerospike()));
         environment.jersey().register(new StaticTokenResource(configuration.getStaticPrivateKey(), configuration.getAerospike()));
         environment.jersey().register( new PrimerExceptionMapper());
     }

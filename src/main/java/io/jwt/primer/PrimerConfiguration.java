@@ -43,14 +43,14 @@ public class PrimerConfiguration extends Configuration {
     private SwaggerBundleConfiguration swagger;
 
     @JsonProperty("hystrix")
-    private HystrixConfig hystrixConfig;
+    private HystrixConfig hystrix;
 
     @JsonProperty("jwt")
-    private JwtConfig jwtConfig;
+    private JwtConfig jwt;
 
     private String staticPrivateKey;
 
     @JsonProperty("discovery")
-    private ServiceDiscoveryConfiguration serviceDiscoveryConfiguration;
+    private ServiceDiscoveryConfiguration discovery;
 
 }
