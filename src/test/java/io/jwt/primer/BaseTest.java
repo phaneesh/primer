@@ -33,6 +33,7 @@ import io.dropwizard.setup.Environment;
 import io.jwt.primer.aeroapike.AerospikeConnectionManager;
 import io.jwt.primer.config.AerospikeConfig;
 import io.jwt.primer.config.JwtConfig;
+import io.jwt.primer.resource.StaticTokenResource;
 import io.jwt.primer.resource.TokenResource;
 import org.zapodot.hystrix.bundle.HystrixBundle;
 
@@ -64,7 +65,21 @@ public class BaseTest {
                                 .build())
                         .build())
                 .command(HystrixCommandConfig.builder()
+                        .name("generate_static")
+                        .threadPool(ThreadPoolConfig.builder()
+                                .concurrency(4)
+                                .timeout(1000)
+                                .build())
+                        .build())
+                .command(HystrixCommandConfig.builder()
                         .name("verify")
+                        .threadPool(ThreadPoolConfig.builder()
+                                .concurrency(4)
+                                .timeout(1000)
+                                .build())
+                        .build())
+                .command(HystrixCommandConfig.builder()
+                        .name("verify_static")
                         .threadPool(ThreadPoolConfig.builder()
                                 .concurrency(4)
                                 .timeout(1000)
@@ -84,6 +99,13 @@ public class BaseTest {
                                 .timeout(1000)
                                 .build())
                         .build())
+                .command(HystrixCommandConfig.builder()
+                        .name("disable_static")
+                        .threadPool(ThreadPoolConfig.builder()
+                                .concurrency(4)
+                                .timeout(1000)
+                                .build())
+                        .build())
                 .build();
 
         private JwtConfig jwtConfig = JwtConfig.builder()
@@ -91,6 +113,8 @@ public class BaseTest {
                 .expiry(10)
                 .privateKey("testisatesttestisatesttestisatesttestisatesttestisatest")
                 .build();
+
+        private String staticPrivateKey = "testisatesttestisatesttestisatesttestisatesttestisatest";
     }
 
     protected final static HealthCheckRegistry healthChecks = mock(HealthCheckRegistry.class);
@@ -102,6 +126,8 @@ public class BaseTest {
     private static final PrimerAppTestConfiguration config = new PrimerAppTestConfiguration();
 
     protected static TokenResource tokenResource;
+
+    protected static StaticTokenResource staticTokenResource;
 
     private static HystrixBundle hystrixBundle = HystrixBundle.builder().disableMetricsPublisher().disableStreamServletInAdminContext().build();
 
@@ -124,5 +150,8 @@ public class BaseTest {
         AerospikeConnectionManager.setClient(aerospikeClient);
 
         tokenResource = new TokenResource(config.jwtConfig, config.aerospikeConfig);
+
+        staticTokenResource = new StaticTokenResource(config.staticPrivateKey, config.aerospikeConfig);
+
     }
 }
