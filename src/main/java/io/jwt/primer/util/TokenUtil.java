@@ -44,6 +44,7 @@ public class TokenUtil {
                                 .param("user_id" , serviceUser.getId())
                                 .param("role" , serviceUser.getRole())
                                 .param("name", serviceUser.getName())
+                                .param("type", "dynamic")
                                 .build()
                 ).build();
     }
@@ -58,6 +59,7 @@ public class TokenUtil {
                                 .subject(id)
                                 .expiration(DateTime.now().plusYears(1000))
                                 .param("role", role)
+                                .param("type", "static")
                                 .build()
                 ).build();
     }
