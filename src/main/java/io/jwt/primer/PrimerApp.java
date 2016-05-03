@@ -32,6 +32,8 @@ import io.jwt.primer.aeroapike.AerospikeConnectionManager;
 import io.jwt.primer.exception.PrimerExceptionMapper;
 import io.jwt.primer.resource.StaticTokenResource;
 import io.jwt.primer.resource.TokenResource;
+import io.jwt.primer.tasks.DeleteDynamicTokensTask;
+import io.jwt.primer.tasks.DeleteStaticTokensTask;
 import org.zapodot.hystrix.bundle.HystrixBundle;
 
 /**
@@ -106,6 +108,8 @@ public class PrimerApp extends Application<PrimerConfiguration> {
         });
         environment.jersey().register(new TokenResource(configuration.getJwt(), configuration.getAerospike()));
         environment.jersey().register(new StaticTokenResource(configuration.getJwt().getPrivateKey(), configuration.getAerospike()));
+        environment.admin().addTask(new DeleteDynamicTokensTask(configuration.getAerospike()));
+        environment.admin().addTask(new DeleteStaticTokensTask(configuration.getAerospike()));
         environment.jersey().register( new PrimerExceptionMapper());
     }
 }
