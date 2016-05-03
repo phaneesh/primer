@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableMultimap;
 import io.dropwizard.servlets.tasks.Task;
 import io.jwt.primer.aeroapike.AerospikeConnectionManager;
 import io.jwt.primer.config.AerospikeConfig;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Singleton;
 import java.io.PrintWriter;
@@ -28,6 +29,7 @@ import java.io.PrintWriter;
  * @author phaneesh
  */
 @Singleton
+@Slf4j
 public class DeleteStaticTokensTask extends Task {
 
     private final AerospikeConfig aerospikeConfig;
@@ -40,11 +42,15 @@ public class DeleteStaticTokensTask extends Task {
     @Override
     public void execute(ImmutableMultimap<String, String> parameters, PrintWriter out) throws Exception {
         if(parameters.containsKey("app")) {
+            log.info("Deleting static tokens for app: " +parameters.get("app"));
+            final String setName = parameters.get("app") + "_static_tokens";
+            log.info("Set Name: " +setName);
             AerospikeConnectionManager.getClient().scanAll(null, aerospikeConfig.getNamespace(),
-                    parameters.get("app") + "_static_tokens", (key, record) ->
+                    setName, (key, record) ->
                             AerospikeConnectionManager.getClient().delete(null, key));
-        } else {
             out.print("Static tokens for app: [" +parameters.get("app") +"] is being deleted" );
+        } else {
+            out.print("Parameter[app] missing!" );
         }
     }
 }
