@@ -42,13 +42,13 @@ public class DeleteStaticTokensTask extends Task {
     @Override
     public void execute(ImmutableMultimap<String, String> parameters, PrintWriter out) throws Exception {
         if(parameters.containsKey("app")) {
-            log.info("Deleting static tokens for app: " +parameters.get("app"));
-            final String setName = parameters.get("app") + "_static_tokens";
+            log.info("Deleting static tokens for app: " +parameters.get("app").asList().get(0));
+            final String setName = parameters.get("app").asList().get(0) + "_static_tokens";
             log.info("Set Name: " +setName);
             AerospikeConnectionManager.getClient().scanAll(null, aerospikeConfig.getNamespace(),
                     setName, (key, record) ->
                             AerospikeConnectionManager.getClient().delete(null, key));
-            out.print("Static tokens for app: [" +parameters.get("app") +"] is being deleted" );
+            out.print("Static tokens for app: [" +parameters.get("app").asList().get(0) +"] is being deleted" );
         } else {
             out.print("Parameter[app] missing!" );
         }
