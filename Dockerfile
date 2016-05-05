@@ -1,7 +1,7 @@
 FROM ubuntu:14.04
 
 RUN \
-  apt-get install -y --no-install-recommends software-properties-common \
+  apt-get clean && apt-get update && apt-get install -y --no-install-recommends software-properties-common \
   && add-apt-repository ppa:webupd8team/java \
   && apt-get update \
   && echo debconf shared/accepted-oracle-license-v1-1 select true |  debconf-set-selections \
