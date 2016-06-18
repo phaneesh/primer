@@ -15,6 +15,7 @@ logging:
   appenders:
     - type: console
       threshold: INFO
+      timeZone: IST
 
 swagger:
   resourcePackage: io.jwt.primer.resource
