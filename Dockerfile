@@ -8,6 +8,8 @@ RUN \
   && echo debconf shared/accepted-oracle-license-v1-1 seen true |  debconf-set-selections \
   && apt-get install -y --no-install-recommends oracle-java8-installer
 
+RUN echo Asia/Kolkata | sudo tee /etc/timezone && sudo dpkg-reconfigure --frontend noninteractive tzdata
+
 EXPOSE 8080
 EXPOSE 8081
 
