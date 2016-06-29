@@ -6,7 +6,7 @@ RUN \
   && apt-get update \
   && echo debconf shared/accepted-oracle-license-v1-1 select true |  debconf-set-selections \
   && echo debconf shared/accepted-oracle-license-v1-1 seen true |  debconf-set-selections \
-  && apt-get install -y --no-install-recommends oracle-java8-installer
+  && apt-get install -y --no-install-recommends oracle-java8-installer curl
 
 RUN echo Asia/Kolkata | sudo tee /etc/timezone && sudo dpkg-reconfigure --frontend noninteractive tzdata
 
