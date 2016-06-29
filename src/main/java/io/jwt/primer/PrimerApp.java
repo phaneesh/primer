@@ -57,9 +57,7 @@ public class PrimerApp extends Application<PrimerConfiguration> {
         );
         bootstrap.addBundle(HystrixBundle.builder()
                 .disableStreamServletInAdminContext()
-                .withApplicationStreamPath("/hystix.stream")
-                .build()
-        );
+                .withApplicationStreamPath("/hystrix.stream").build());
         bootstrap.addBundle(new SwaggerBundle<PrimerConfiguration>() {
             @Override
             protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(PrimerConfiguration configuration) {
