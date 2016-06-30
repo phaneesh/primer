@@ -29,6 +29,7 @@ aerospike:
   timeout: ${AEROSPIKE_TIMEOUT}
   retries: ${AEROSPIKE_RETRIES}
   sleepBetweenRetries: ${AEROSPIKE_SLEEP_BETWEEN_RETRIES}
+  maxSocketIdle: ${AEROSPIKE_MAX_SOCKET_IDLE}
 
 hystrix:
   defaultConfig:
