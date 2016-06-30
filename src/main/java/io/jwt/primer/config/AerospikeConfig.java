@@ -41,4 +41,6 @@ public class AerospikeConfig {
     private int retries;
 
     private int sleepBetweenRetries;
+
+    private int maxSocketIdle = 4140;
 }

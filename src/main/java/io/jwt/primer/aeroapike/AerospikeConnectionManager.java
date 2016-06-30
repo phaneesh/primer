@@ -59,6 +59,7 @@ public class AerospikeConnectionManager {
         clientPolicy.readPolicyDefault = readPolicy;
         clientPolicy.writePolicyDefault = writePolicy;
         clientPolicy.failIfNotConnected = true;
+        clientPolicy.maxSocketIdle = config.getMaxSocketIdle();
 
         val hosts = config.getHosts().split(",");
         val hostAddresses = Arrays.stream(hosts).map( h -> {
