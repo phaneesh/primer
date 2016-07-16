@@ -22,57 +22,40 @@ import com.hystrix.configurator.core.BaseCommand;
 import io.jwt.primer.aeroapike.AerospikeConnectionManager;
 import io.jwt.primer.config.AerospikeConfig;
 import io.jwt.primer.exception.PrimerException;
-import io.jwt.primer.model.VerifyStaticResponse;
-
-import javax.ws.rs.core.Response;
+import io.jwt.primer.model.StaticToken;
 
 /**
  * @author phaneesh
  */
-public class VerifyStaticCommand extends BaseCommand<VerifyStaticResponse> {
+public class GetStaticTokenCommand extends BaseCommand<StaticToken> {
 
     private final AerospikeConfig aerospikeConfig;
-
-    private final String token;
 
     private final String id;
 
     private final String app;
 
-    private final String role;
-
-    public VerifyStaticCommand(final AerospikeConfig aerospikeConfig, final String token,
-                         final String id, final String app, final String role) {
-        super("verify_static");
+    public GetStaticTokenCommand(final AerospikeConfig aerospikeConfig, final String id, final String app) {
+        super("get_static");
         this.aerospikeConfig = aerospikeConfig;
-        this.token = token;
         this.id = id;
         this.app = app;
-        this.role = role;
     }
 
     @Override
-    protected VerifyStaticResponse run() throws PrimerException {
+    protected StaticToken run() throws PrimerException {
         final Key key = new Key(aerospikeConfig.getNamespace(), String.format("%s_static_tokens", app), id);
         final Record record = AerospikeConnectionManager.getClient().get(null, key, "token", "subject", "enabled", "role");
         if (null == record) {
-            throw new PrimerException(Response.Status.NOT_FOUND.getStatusCode(), "PR001", "Not Found");
+            return null;
         }
-        if (!record.getBoolean("enabled")) {
-            throw new PrimerException(Response.Status.FORBIDDEN.getStatusCode(), "PR002", "Forbidden");
-        }
-        final String subject = record.getString("subject");
-        final String role = record.getString("role");
-        final String fetchedToken = record.getString("token");
-        if (token.equals(fetchedToken) && id.equals(subject)
-                && role.equals(role)) {
-            return VerifyStaticResponse.builder()
-                    .token(fetchedToken)
-                    .id(subject)
-                    .role(role)
-                    .build();
-        } else {
-            throw new PrimerException(Response.Status.UNAUTHORIZED.getStatusCode(), "PR004", "Unauthorized");
-        }
+        StaticToken token = StaticToken.builder()
+                .id(id)
+                .enabled(record.getBoolean("enabled"))
+                .role(record.getString("role"))
+                .subject(record.getString("subject"))
+                .token(record.getString("token"))
+                .build();
+        return token;
     }
 }

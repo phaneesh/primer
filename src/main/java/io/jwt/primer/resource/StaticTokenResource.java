@@ -21,10 +21,11 @@ import com.github.toastshaman.dropwizard.auth.jwt.hmac.HmacSHA512Signer;
 import com.google.common.base.Charsets;
 import io.jwt.primer.command.DisableStaticCommand;
 import io.jwt.primer.command.GenerateStaticCommand;
-import io.jwt.primer.command.VerifyStaticCommand;
+import io.jwt.primer.command.GetStaticTokenCommand;
 import io.jwt.primer.config.AerospikeConfig;
 import io.jwt.primer.exception.PrimerException;
 import io.jwt.primer.model.PrimerError;
+import io.jwt.primer.model.StaticToken;
 import io.jwt.primer.model.StaticTokenResponse;
 import io.jwt.primer.model.VerifyStaticResponse;
 import io.swagger.annotations.Api;
@@ -111,8 +112,24 @@ public class StaticTokenResource {
     public VerifyStaticResponse verify(@HeaderParam("X-Auth-Token") String token, @PathParam("app") String app,
                                  @PathParam("id") String id, @PathParam("role") String role) throws PrimerException {
         try {
-            VerifyStaticCommand verifyCommand = new VerifyStaticCommand(aerospikeConfig, token, id, app, role);
-            return verifyCommand.queue().get();
+            GetStaticTokenCommand getStaticTokenCommand = new GetStaticTokenCommand(aerospikeConfig, id, app);
+            StaticToken staticToken = getStaticTokenCommand.queue().get();
+            if (null == staticToken) {
+                throw new PrimerException(Response.Status.NOT_FOUND.getStatusCode(), "PR001", "Not Found");
+            }
+            if (!staticToken.isEnabled()) {
+                throw new PrimerException(Response.Status.FORBIDDEN.getStatusCode(), "PR002", "Forbidden");
+            }
+            if (token.equals(staticToken.getToken()) && id.equals(staticToken.getSubject())
+                    && role.equals(role)) {
+                return VerifyStaticResponse.builder()
+                        .token(staticToken.getToken())
+                        .id(staticToken.getSubject())
+                        .role(role)
+                        .build();
+            } else {
+                throw new PrimerException(Response.Status.UNAUTHORIZED.getStatusCode(), "PR004", "Unauthorized");
+            }
         } catch (Exception e) {
             log.error("Error verifying token", e);
             if(ExceptionUtils.getRootCause(e) instanceof PrimerException) {

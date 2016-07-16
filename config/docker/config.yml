@@ -44,7 +44,7 @@ hystrix:
       threadPool:
         timeout: 200
         concurrency: 4
-    - name: verify
+    - name: get_dynamic
       threadPool:
         timeout: 100
         concurrency: 4
@@ -56,7 +56,7 @@ hystrix:
       threadPool:
         timeout: 200
         concurrency: 4
-    - name: verify_static
+    - name: get_static
       threadPool:
         timeout: 100
         concurrency: 4
@@ -68,10 +68,7 @@ hystrix:
       threadPool:
         timeout: 100
         concurrency: 1
-    - name: get
-      threadPool:
-        timeout: 100
-        concurrency: 2
+
 jwt:
   privateKey: ${JWT_PRIVATE_KEY}
   clockSkew: ${JWT_CLOCK_SKEW}

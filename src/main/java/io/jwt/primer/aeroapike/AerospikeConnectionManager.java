@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 import java.util.Arrays;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 /**
@@ -40,6 +41,17 @@ public class AerospikeConnectionManager {
 
     public static void init(AerospikeConfig aerospikeConfig) {
         config = aerospikeConfig;
+
+        val hosts = config.getHosts().split(",");
+        val hostAddresses = Arrays.stream(hosts).map( h -> {
+            String host[] = h.split(":");
+            if(host.length == 2) {
+                return new Host(host[0], Integer.parseInt(host[1]));
+            } else {
+                return new Host(host[0], 3000);
+            }
+        }).collect(Collectors.toList());
+
         val readPolicy = new Policy();
         readPolicy.maxRetries = config.getRetries();
         readPolicy.consistencyLevel = ConsistencyLevel.CONSISTENCY_ONE;
@@ -60,16 +72,8 @@ public class AerospikeConnectionManager {
         clientPolicy.writePolicyDefault = writePolicy;
         clientPolicy.failIfNotConnected = true;
         clientPolicy.maxSocketIdle = config.getMaxSocketIdle();
+        clientPolicy.threadPool = Executors.newFixedThreadPool(config.getMaxConnectionsPerNode() * hosts.length);
 
-        val hosts = config.getHosts().split(",");
-        val hostAddresses = Arrays.stream(hosts).map( h -> {
-            String host[] = h.split(":");
-            if(host.length == 2) {
-                return new Host(host[0], Integer.parseInt(host[1]));
-            } else {
-                return new Host(host[0], 3000);
-            }
-        }).collect(Collectors.toList());
         client = new AerospikeClient(clientPolicy, hostAddresses.toArray(new Host[0]));
         log.info("Aerospike connection status: " +client.isConnected());
     }

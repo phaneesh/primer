@@ -16,21 +16,15 @@
 
 package io.jwt.primer.command;
 
-import com.aerospike.client.Bin;
 import com.aerospike.client.Key;
 import com.aerospike.client.Record;
 import com.hystrix.configurator.core.BaseCommand;
 import io.jwt.primer.aeroapike.AerospikeConnectionManager;
 import io.jwt.primer.config.AerospikeConfig;
-import io.jwt.primer.config.JwtConfig;
-import io.jwt.primer.exception.PrimerException;
-import io.jwt.primer.model.GetTokenResponse;
-import io.jwt.primer.model.ServiceUser;
-import io.jwt.primer.model.VerifyResponse;
+import io.jwt.primer.model.DynamicToken;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.ws.rs.core.Response;
 import java.sql.Date;
 import java.time.Instant;
 
@@ -38,7 +32,7 @@ import java.time.Instant;
  * @author phaneesh
  */
 @Slf4j
-public class GetTokenCommand extends BaseCommand<GetTokenResponse> {
+public class GetDynamicTokenCommand extends BaseCommand<DynamicToken> {
 
     private final AerospikeConfig aerospikeConfig;
 
@@ -47,21 +41,21 @@ public class GetTokenCommand extends BaseCommand<GetTokenResponse> {
     private final String app;
 
     @Builder
-    public GetTokenCommand(final AerospikeConfig aerospikeConfig, final String app, final String id) {
-        super("get");
+    public GetDynamicTokenCommand(final AerospikeConfig aerospikeConfig, final String app, final String id) {
+        super("get_dynamic");
         this.aerospikeConfig = aerospikeConfig;
         this.id = id;
         this.app = app;
     }
 
     @Override
-    protected GetTokenResponse run() throws PrimerException {
+    protected DynamicToken run() {
         final Key key = new Key(aerospikeConfig.getNamespace(), String.format("%s_tokens", app), id);
         final Record record = AerospikeConnectionManager.getClient().get(null, key);
         if (null == record) {
-            throw new PrimerException(Response.Status.NOT_FOUND.getStatusCode(), "PR001", "Not Found");
+            return null;
         }
-        return GetTokenResponse.builder()
+        return DynamicToken.builder()
                 .subject(record.getString("subject"))
                 .enabled(record.getBoolean("enabled"))
                 .expiresAt(Date.from(Instant.ofEpochSecond(record.getLong("expires_at"))))

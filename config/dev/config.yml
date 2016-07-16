@@ -43,7 +43,7 @@ hystrix:
       threadPool:
         timeout: 200
         concurrency: 4
-    - name: verify
+    - name: get_dynamic
       threadPool:
         timeout: 100
         concurrency: 4
@@ -55,7 +55,7 @@ hystrix:
       threadPool:
         timeout: 200
         concurrency: 4
-    - name: verify_static
+    - name: get_static
       threadPool:
         timeout: 100
         concurrency: 4
@@ -64,10 +64,6 @@ hystrix:
         timeout: 200
         concurrency: 4
     - name: expire
-      threadPool:
-        timeout: 100
-        concurrency: 1
-    - name: get
       threadPool:
         timeout: 100
         concurrency: 1

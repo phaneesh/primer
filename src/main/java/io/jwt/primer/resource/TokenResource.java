@@ -36,6 +36,7 @@ import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.time.Instant;
 
 /**
  * @author phaneesh
@@ -132,11 +133,14 @@ public class TokenResource {
             @ApiResponse(code = 500, response = PrimerError.class, message = "Error"),
     })
     @Metered
-    public GetTokenResponse get(@PathParam("id") String id,
+    public DynamicToken get(@PathParam("id") String id,
                                       @PathParam("app") String app) throws PrimerException {
         try {
-            GetTokenCommand getTokenCommand = new GetTokenCommand(aerospikeConfig, app, id);
-            return getTokenCommand.queue().get();
+            GetDynamicTokenCommand getDynamicTokenCommand = new GetDynamicTokenCommand(aerospikeConfig, app, id);
+            DynamicToken dynamicToken = getDynamicTokenCommand.queue().get();
+            if(dynamicToken == null)
+                throw new PrimerException(Response.Status.NOT_FOUND.getStatusCode(), "PR001", "Not Found");
+            return dynamicToken;
         } catch (Exception e) {
             log.error("Error getting token", e);
             if(ExceptionUtils.getRootCause(e) instanceof PrimerException) {
@@ -161,8 +165,28 @@ public class TokenResource {
     public VerifyResponse verify(@HeaderParam("X-Auth-Token") String token, @PathParam("app") String app,
                                  @PathParam("id") String id, @Valid ServiceUser user) throws PrimerException {
         try {
-            VerifyCommand verifyCommand = new VerifyCommand(aerospikeConfig, jwtConfig, token, id, app, user);
-            return verifyCommand.queue().get();
+            GetDynamicTokenCommand getDynamicTokenCommand = new GetDynamicTokenCommand(aerospikeConfig, app, id);
+            DynamicToken dynamicToken = getDynamicTokenCommand.queue().get();
+            if(dynamicToken == null)
+                throw new PrimerException(Response.Status.NOT_FOUND.getStatusCode(), "PR001", "Not Found");
+            if(!dynamicToken.isEnabled()) {
+                throw new PrimerException(Response.Status.FORBIDDEN.getStatusCode(), "PR002", "Forbidden");
+            }
+            final long adjusted = Instant.ofEpochSecond(dynamicToken.getExpiresAt().getTime()).plusSeconds(jwtConfig.getClockSkew()).getEpochSecond();
+            final long now = Instant.now().getEpochSecond();
+            if(now >= adjusted  ) {
+                throw new PrimerException(Response.Status.PRECONDITION_FAILED.getStatusCode(), "PR003", "Expired");
+            }
+            if(token.equals(dynamicToken.getToken()) && user.getId().equals(dynamicToken.getSubject())
+                    && user.getName().equals(dynamicToken.getName()) && user.getRole().equals(dynamicToken.getRole())) {
+                return VerifyResponse.builder()
+                        .expiresAt(dynamicToken.getExpiresAt().getTime())
+                        .token(dynamicToken.getToken())
+                        .userId(dynamicToken.getSubject())
+                        .build();
+            } else {
+                throw new PrimerException(Response.Status.UNAUTHORIZED.getStatusCode(), "PR004", "Unauthorized");
+            }
         } catch (Exception e) {
             log.error("Error verifying token", e);
             if(ExceptionUtils.getRootCause(e) instanceof PrimerException) {
