@@ -4,7 +4,7 @@
 
     <groupId>io.jwt</groupId>
     <artifactId>primer</artifactId>
-    <version>1.0</version>
+    <version>${project.version}</version>
     <packaging>jar</packaging>
 
     <name>primer</name>
