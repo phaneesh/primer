@@ -174,7 +174,7 @@ public class TokenResource {
             }
             final long adjusted = Instant.ofEpochSecond(dynamicToken.getExpiresAt().getTime()).plusSeconds(jwtConfig.getClockSkew()).getEpochSecond();
             final long now = Instant.now().getEpochSecond();
-            if(now >= adjusted  ) {
+            if(adjusted <= now) {
                 throw new PrimerException(Response.Status.PRECONDITION_FAILED.getStatusCode(), "PR003", "Expired");
             }
             if(token.equals(dynamicToken.getToken()) && user.getId().equals(dynamicToken.getSubject())
