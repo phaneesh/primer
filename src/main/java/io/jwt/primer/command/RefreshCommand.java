@@ -79,8 +79,10 @@ public class RefreshCommand extends BaseCommand<RefreshResponse> {
         final Bin issuedAtBin = new Bin("issued_at", newToken.claim().issuedAt());
         final Bin expiresAtBin = new Bin("expires_at", newToken.claim().expiration());
         final Bin previousRefreshToken = new Bin("refresh_tokenp", token.getRefreshToken());
+        final Bin previousToken = new Bin("tokenp", token.getToken());
         AerospikeConnectionManager.getClient().operate(null, key,
                 Operation.put(tokenBin),
+                Operation.put(previousToken),
                 Operation.put(refreshTokenBin),
                 Operation.put(previousRefreshToken),
                 Operation.put(issuedAtBin),

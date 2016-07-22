@@ -19,6 +19,7 @@ package io.jwt.primer.resource;
 import com.codahale.metrics.annotation.Metered;
 import com.github.toastshaman.dropwizard.auth.jwt.hmac.HmacSHA512Signer;
 import com.google.common.base.Charsets;
+import com.google.common.base.Strings;
 import io.jwt.primer.command.*;
 import io.jwt.primer.config.AerospikeConfig;
 import io.jwt.primer.config.JwtConfig;
@@ -210,13 +211,22 @@ public class TokenResource {
             if(!dynamicToken.isEnabled()) {
                 throw new PrimerException(Response.Status.FORBIDDEN.getStatusCode(), "PR002", "Forbidden");
             }
-            if(dynamicToken.getToken().equals(token) && (dynamicToken.getRefreshToken().equals(refresh)
-                    || dynamicToken.getPreviousRefreshToken().equals(refresh))) {
+            if(dynamicToken.getToken().equals(token) && dynamicToken.getRefreshToken().equals(refresh)) {
                 RefreshCommand refreshCommand = new RefreshCommand(signer, jwtConfig, aerospikeConfig,
                         id, app, dynamicToken);
                 return refreshCommand.queue().get();
             } else {
-                throw new PrimerException(Response.Status.UNAUTHORIZED.getStatusCode(), "PR004", "Unauthorized");
+                if(Strings.isNullOrEmpty(dynamicToken.getPreviousToken()) && Strings.isNullOrEmpty(dynamicToken.getPreviousRefreshToken())) {
+                    if(dynamicToken.getPreviousToken().equals(token) && dynamicToken.getPreviousRefreshToken().equals(refresh)) {
+                        RefreshCommand refreshCommand = new RefreshCommand(signer, jwtConfig, aerospikeConfig,
+                                id, app, dynamicToken);
+                        return refreshCommand.queue().get();
+                    } else {
+                        throw new PrimerException(Response.Status.UNAUTHORIZED.getStatusCode(), "PR004", "Unauthorized");
+                    }
+                } else {
+                    throw new PrimerException(Response.Status.UNAUTHORIZED.getStatusCode(), "PR004", "Unauthorized");
+                }
             }
         } catch (Exception e) {
             log.error("Error refreshing token", e);

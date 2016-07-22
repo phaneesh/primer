@@ -35,6 +35,8 @@ public class DynamicToken {
 
     private String token;
 
+    private String previousToken;
+
     private String refreshToken;
 
     private String previousRefreshToken;
