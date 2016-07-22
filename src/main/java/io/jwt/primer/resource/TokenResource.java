@@ -216,17 +216,14 @@ public class TokenResource {
                         id, app, dynamicToken);
                 return refreshCommand.queue().get();
             } else {
-                if(Strings.isNullOrEmpty(dynamicToken.getPreviousToken()) && Strings.isNullOrEmpty(dynamicToken.getPreviousRefreshToken())) {
-                    if(dynamicToken.getPreviousToken().equals(token) && dynamicToken.getPreviousRefreshToken().equals(refresh)) {
+                if(!Strings.isNullOrEmpty(dynamicToken.getPreviousToken()) && !Strings.isNullOrEmpty(dynamicToken.getPreviousRefreshToken())) {
+                    if (dynamicToken.getPreviousToken().equals(token) && dynamicToken.getPreviousRefreshToken().equals(refresh)) {
                         RefreshCommand refreshCommand = new RefreshCommand(signer, jwtConfig, aerospikeConfig,
                                 id, app, dynamicToken);
                         return refreshCommand.queue().get();
-                    } else {
-                        throw new PrimerException(Response.Status.UNAUTHORIZED.getStatusCode(), "PR004", "Unauthorized");
                     }
-                } else {
-                    throw new PrimerException(Response.Status.UNAUTHORIZED.getStatusCode(), "PR004", "Unauthorized");
                 }
+                throw new PrimerException(Response.Status.UNAUTHORIZED.getStatusCode(), "PR004", "Unauthorized");
             }
         } catch (Exception e) {
             log.error("Error refreshing token", e);
