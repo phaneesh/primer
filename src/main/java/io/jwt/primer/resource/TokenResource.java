@@ -102,6 +102,28 @@ public class TokenResource {
         }
     }
 
+    @DELETE
+    @Path("/v1/clear/{app}/{id}")
+    @ApiOperation(value = "Clear JWT token for given user")
+    @ApiResponses({
+            @ApiResponse(code = 200, response = TokenClearResponse.class, message = "Success"),
+            @ApiResponse(code = 500, response = PrimerError.class, message = "Error"),
+    })
+    @Metered
+    public TokenClearResponse clear(@PathParam("id") String id,
+                                        @PathParam("app") String app) throws PrimerException {
+        try {
+            ClearCommand clearCommand = new ClearCommand(aerospikeConfig, app, id);
+            return clearCommand.queue().get();
+        } catch (Exception e) {
+            log.error("Error clearing token", e);
+            if(ExceptionUtils.getRootCause(e) instanceof PrimerException) {
+                throw (PrimerException)ExceptionUtils.getRootCause(e);
+            }
+            throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR000", e.getMessage());
+        }
+    }
+
     @POST
     @Path("/v1/expire/{app}/{id}")
     @ApiOperation(value = "Expire a JWT token for given user")
