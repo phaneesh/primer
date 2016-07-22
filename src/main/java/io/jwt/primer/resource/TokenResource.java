@@ -202,11 +202,22 @@ public class TokenResource {
     public RefreshResponse refresh(@HeaderParam("X-Auth-Token") String token,
                                    @HeaderParam("X-Refresh-Token") String refresh, @PathParam("app") String app,
                                    @PathParam("id") String id) throws PrimerException {
-
         try {
-            RefreshCommand refreshCommand = new RefreshCommand(signer, jwtConfig, aerospikeConfig,
-                    id, app, token, refresh);
-            return refreshCommand.queue().get();
+            GetDynamicTokenCommand getDynamicTokenCommand = new GetDynamicTokenCommand(aerospikeConfig, app, id);
+            DynamicToken dynamicToken = getDynamicTokenCommand.queue().get();
+            if(dynamicToken == null)
+                throw new PrimerException(Response.Status.NOT_FOUND.getStatusCode(), "PR001", "Not Found");
+            if(!dynamicToken.isEnabled()) {
+                throw new PrimerException(Response.Status.FORBIDDEN.getStatusCode(), "PR002", "Forbidden");
+            }
+            if(dynamicToken.getToken().equals(token) && (dynamicToken.getRefreshToken().equals(refresh)
+                    || dynamicToken.getPreviousRefreshToken().equals(refresh))) {
+                RefreshCommand refreshCommand = new RefreshCommand(signer, jwtConfig, aerospikeConfig,
+                        id, app, dynamicToken);
+                return refreshCommand.queue().get();
+            } else {
+                throw new PrimerException(Response.Status.UNAUTHORIZED.getStatusCode(), "PR004", "Unauthorized");
+            }
         } catch (Exception e) {
             log.error("Error refreshing token", e);
             if(ExceptionUtils.getRootCause(e) instanceof PrimerException) {

@@ -64,6 +64,7 @@ public class GetDynamicTokenCommand extends BaseCommand<DynamicToken> {
                 .issuedAt(Date.from(Instant.ofEpochSecond(record.getLong("issued_at"))))
                 .name(record.getString("name"))
                 .refreshToken(record.getString("refresh_token"))
+                .previousRefreshToken(record.getString("refresh_token_prev"))
                 .role(record.getString("role"))
                 .build();
     }
