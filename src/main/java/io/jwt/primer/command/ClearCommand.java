@@ -51,9 +51,6 @@ public class ClearCommand extends BaseCommand<TokenClearResponse> {
     protected TokenClearResponse run() throws PrimerException {
         final Key key = new Key(aerospikeConfig.getNamespace(), String.format("%s_tokens", app), id);
         final boolean result = AerospikeConnectionManager.getClient().delete(null, key);
-        if (!result) {
-            throw new PrimerException(Response.Status.NOT_FOUND.getStatusCode(), "PR001", "Not Found");
-        }
-        return TokenClearResponse.builder().userId(id).build();
+        return result ? TokenClearResponse.builder().userId(id).build() : null;
     }
 }

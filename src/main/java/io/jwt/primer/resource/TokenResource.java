@@ -92,7 +92,11 @@ public class TokenResource {
                                         @PathParam("app") String app) throws PrimerException {
         try {
             DisableCommand disableCommand = new DisableCommand(aerospikeConfig, app, id);
-            return disableCommand.queue().get();
+            TokenDisableResponse response = disableCommand.queue().get();
+            if(response == null) {
+                throw new PrimerException(Response.Status.NOT_FOUND.getStatusCode(), "PR001", "Not Found");
+            }
+            return response;
         } catch (InterruptedException | ExecutionException e) {
             log.error("Execution Error disabling token", e);
             throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR001", "Error");
@@ -111,7 +115,11 @@ public class TokenResource {
                                     @PathParam("app") String app) throws PrimerException {
         try {
             ClearCommand clearCommand = new ClearCommand(aerospikeConfig, app, id);
-            return clearCommand.queue().get();
+            TokenClearResponse response = clearCommand.queue().get();
+            if(response == null) {
+                throw new PrimerException(Response.Status.NOT_FOUND.getStatusCode(), "PR001", "Not Found");
+            }
+            return response;
         } catch (InterruptedException | ExecutionException e) {
             log.error("Execution Error clearing token", e);
             throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR001", "Error");
@@ -131,6 +139,10 @@ public class TokenResource {
                                       @PathParam("app") String app) throws PrimerException {
         try {
             ExpireCommand expireCommand = new ExpireCommand(aerospikeConfig, app, id);
+            TokenExpireResponse response = expireCommand.queue().get();
+            if(response == null) {
+                throw new PrimerException(Response.Status.NOT_FOUND.getStatusCode(), "PR001", "Not Found");
+            }
             return expireCommand.queue().get();
         } catch (InterruptedException | ExecutionException e) {
             log.error("Execution Error disabling token", e);

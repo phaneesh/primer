@@ -49,13 +49,12 @@ public class GetStaticTokenCommand extends BaseCommand<StaticToken> {
         if (null == record) {
             return null;
         }
-        StaticToken token = StaticToken.builder()
+        return StaticToken.builder()
                 .id(id)
                 .enabled(record.getBoolean("enabled"))
                 .role(record.getString("role"))
                 .subject(record.getString("subject"))
                 .token(record.getString("token"))
                 .build();
-        return token;
     }
 }

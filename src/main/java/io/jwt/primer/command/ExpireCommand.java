@@ -53,7 +53,7 @@ public class ExpireCommand extends BaseCommand<TokenExpireResponse> {
         final Key key = new Key(aerospikeConfig.getNamespace(), String.format("%s_tokens", app), id);
         final Record record = AerospikeConnectionManager.getClient().get(null, key, "token", "subject", "expires_at");
         if (null == record) {
-            throw new PrimerException(Response.Status.NOT_FOUND.getStatusCode(), "PR001", "Not Found");
+            return null;
         }
         long expiry = Instant.now().minus(1, ChronoUnit.DAYS).getEpochSecond();
         final Bin expiresAt = new Bin("expires_at", expiry);

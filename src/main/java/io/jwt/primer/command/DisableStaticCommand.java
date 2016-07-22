@@ -51,7 +51,7 @@ public class DisableStaticCommand extends BaseCommand<StaticTokenResponse> {
         final Key key = new Key(aerospikeConfig.getNamespace(), String.format("%s_static_tokens", app), id);
         final Record record = AerospikeConnectionManager.getClient().get(null, key, "token");
         if (null == record) {
-            throw new PrimerException(Response.Status.NOT_FOUND.getStatusCode(), "PR001", "Not Found");
+            return null;
         }
         final Bin enabledBin = new Bin("enabled", false);
         AerospikeConnectionManager.getClient().operate(null, key, Operation.put(enabledBin));

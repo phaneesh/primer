@@ -51,7 +51,7 @@ public class DisableCommand extends BaseCommand<TokenDisableResponse> {
         final Key key = new Key(aerospikeConfig.getNamespace(), String.format("%s_tokens", app), id);
         final Record record = AerospikeConnectionManager.getClient().get(null, key, "token", "subject");
         if (null == record) {
-            throw new PrimerException(Response.Status.NOT_FOUND.getStatusCode(), "PR001", "Not Found");
+            return null;
         }
         final Bin enabledBin = new Bin("enabled", false);
         AerospikeConnectionManager.getClient().operate(null, key, Operation.put(enabledBin));
