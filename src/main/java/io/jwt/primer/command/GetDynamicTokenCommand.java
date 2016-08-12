@@ -18,15 +18,23 @@ package io.jwt.primer.command;
 
 import com.aerospike.client.Key;
 import com.aerospike.client.Record;
+import com.github.rholder.retry.RetryException;
+import com.github.rholder.retry.Retryer;
+import com.github.rholder.retry.RetryerBuilder;
+import com.github.rholder.retry.StopStrategies;
 import com.hystrix.configurator.core.BaseCommand;
 import io.jwt.primer.aeroapike.AerospikeConnectionManager;
 import io.jwt.primer.config.AerospikeConfig;
+import io.jwt.primer.exception.PrimerException;
 import io.jwt.primer.model.DynamicToken;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.EOFException;
 import java.sql.Date;
 import java.time.Instant;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 
 /**
  * @author phaneesh
@@ -35,6 +43,11 @@ import java.time.Instant;
 public class GetDynamicTokenCommand extends BaseCommand<DynamicToken> {
 
     private final AerospikeConfig aerospikeConfig;
+
+    private final Retryer<DynamicToken> tokenRetryer = RetryerBuilder.<DynamicToken>newBuilder()
+            .retryIfExceptionOfType(EOFException.class)
+            .withStopStrategy(StopStrategies.stopAfterAttempt(3))
+            .build();
 
     private final String id;
 
@@ -49,24 +62,33 @@ public class GetDynamicTokenCommand extends BaseCommand<DynamicToken> {
     }
 
     @Override
-    protected DynamicToken run() {
-        final Key key = new Key(aerospikeConfig.getNamespace(), String.format("%s_tokens", app), id);
-        final Record record = AerospikeConnectionManager.getClient().get(null, key);
-        if (null == record) {
-            return null;
+    protected DynamicToken run() throws PrimerException {
+        Callable<DynamicToken> callable = () -> {
+            final Key key = new Key(aerospikeConfig.getNamespace(), String.format("%s_tokens", app), id);
+            final Record record = AerospikeConnectionManager.getClient().get(null, key);
+            if (null == record) {
+                return null;
+            }
+            return DynamicToken.builder()
+                    .subject(record.getString("subject"))
+                    .enabled(record.getBoolean("enabled"))
+                    .expiresAt(Date.from(Instant.ofEpochSecond(record.getLong("expires_at"))))
+                    .id(id)
+                    .token(record.getString("token"))
+                    .previousToken(record.getString("tokenp"))
+                    .issuedAt(Date.from(Instant.ofEpochSecond(record.getLong("issued_at"))))
+                    .name(record.getString("name"))
+                    .refreshToken(record.getString("refresh_token"))
+                    .previousRefreshToken(record.getString("refresh_tokenp"))
+                    .role(record.getString("role"))
+                    .build();
+        };
+        try {
+            return tokenRetryer.call(callable);
+        } catch (ExecutionException e) {
+            throw new PrimerException(500, "PR000", e.getMessage());
+        } catch (RetryException e) {
+            throw new PrimerException(500, "PR000", e.getMessage());
         }
-        return DynamicToken.builder()
-                .subject(record.getString("subject"))
-                .enabled(record.getBoolean("enabled"))
-                .expiresAt(Date.from(Instant.ofEpochSecond(record.getLong("expires_at"))))
-                .id(id)
-                .token(record.getString("token"))
-                .previousToken(record.getString("tokenp"))
-                .issuedAt(Date.from(Instant.ofEpochSecond(record.getLong("issued_at"))))
-                .name(record.getString("name"))
-                .refreshToken(record.getString("refresh_token"))
-                .previousRefreshToken(record.getString("refresh_tokenp"))
-                .role(record.getString("role"))
-                .build();
     }
 }

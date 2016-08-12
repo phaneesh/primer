@@ -18,11 +18,19 @@ package io.jwt.primer.command;
 
 import com.aerospike.client.Key;
 import com.aerospike.client.Record;
+import com.github.rholder.retry.RetryException;
+import com.github.rholder.retry.Retryer;
+import com.github.rholder.retry.RetryerBuilder;
+import com.github.rholder.retry.StopStrategies;
 import com.hystrix.configurator.core.BaseCommand;
 import io.jwt.primer.aeroapike.AerospikeConnectionManager;
 import io.jwt.primer.config.AerospikeConfig;
 import io.jwt.primer.exception.PrimerException;
 import io.jwt.primer.model.StaticToken;
+
+import java.io.EOFException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 
 /**
  * @author phaneesh
@@ -30,6 +38,11 @@ import io.jwt.primer.model.StaticToken;
 public class GetStaticTokenCommand extends BaseCommand<StaticToken> {
 
     private final AerospikeConfig aerospikeConfig;
+
+    private final Retryer<StaticToken> tokenRetryer = RetryerBuilder.<StaticToken>newBuilder()
+            .retryIfExceptionOfType(EOFException.class)
+            .withStopStrategy(StopStrategies.stopAfterAttempt(3))
+            .build();
 
     private final String id;
 
@@ -44,17 +57,26 @@ public class GetStaticTokenCommand extends BaseCommand<StaticToken> {
 
     @Override
     protected StaticToken run() throws PrimerException {
-        final Key key = new Key(aerospikeConfig.getNamespace(), String.format("%s_static_tokens", app), id);
-        final Record record = AerospikeConnectionManager.getClient().get(null, key, "token", "subject", "enabled", "role");
-        if (null == record) {
-            return null;
+        Callable<StaticToken> callable = () -> {
+            final Key key = new Key(aerospikeConfig.getNamespace(), String.format("%s_static_tokens", app), id);
+            final Record record = AerospikeConnectionManager.getClient().get(null, key, "token", "subject", "enabled", "role");
+            if (null == record) {
+                return null;
+            }
+            return StaticToken.builder()
+                    .id(id)
+                    .enabled(record.getBoolean("enabled"))
+                    .role(record.getString("role"))
+                    .subject(record.getString("subject"))
+                    .token(record.getString("token"))
+                    .build();
+        };
+        try {
+            return tokenRetryer.call(callable);
+        } catch (ExecutionException e) {
+            throw new PrimerException(500, "PR000", e.getMessage());
+        } catch (RetryException e) {
+            throw new PrimerException(500, "PR000", e.getMessage());
         }
-        return StaticToken.builder()
-                .id(id)
-                .enabled(record.getBoolean("enabled"))
-                .role(record.getString("role"))
-                .subject(record.getString("subject"))
-                .token(record.getString("token"))
-                .build();
     }
 }
