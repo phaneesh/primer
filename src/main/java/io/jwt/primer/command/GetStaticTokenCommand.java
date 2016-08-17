@@ -16,6 +16,7 @@
 
 package io.jwt.primer.command;
 
+import com.aerospike.client.AerospikeException;
 import com.aerospike.client.Key;
 import com.aerospike.client.Record;
 import com.github.rholder.retry.RetryException;
@@ -28,7 +29,6 @@ import io.jwt.primer.config.AerospikeConfig;
 import io.jwt.primer.exception.PrimerException;
 import io.jwt.primer.model.StaticToken;
 
-import java.io.EOFException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
@@ -40,7 +40,7 @@ public class GetStaticTokenCommand extends BaseCommand<StaticToken> {
     private final AerospikeConfig aerospikeConfig;
 
     private final Retryer<StaticToken> tokenRetryer = RetryerBuilder.<StaticToken>newBuilder()
-            .retryIfExceptionOfType(EOFException.class)
+            .retryIfExceptionOfType(AerospikeException.class)
             .withStopStrategy(StopStrategies.stopAfterAttempt(3))
             .build();
 

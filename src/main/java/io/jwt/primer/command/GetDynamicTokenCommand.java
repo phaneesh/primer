@@ -16,6 +16,7 @@
 
 package io.jwt.primer.command;
 
+import com.aerospike.client.AerospikeException;
 import com.aerospike.client.Key;
 import com.aerospike.client.Record;
 import com.github.rholder.retry.RetryException;
@@ -30,7 +31,6 @@ import io.jwt.primer.model.DynamicToken;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.EOFException;
 import java.sql.Date;
 import java.time.Instant;
 import java.util.concurrent.Callable;
@@ -45,7 +45,7 @@ public class GetDynamicTokenCommand extends BaseCommand<DynamicToken> {
     private final AerospikeConfig aerospikeConfig;
 
     private final Retryer<DynamicToken> tokenRetryer = RetryerBuilder.<DynamicToken>newBuilder()
-            .retryIfExceptionOfType(EOFException.class)
+            .retryIfExceptionOfType(AerospikeException.class)
             .withStopStrategy(StopStrategies.stopAfterAttempt(3))
             .build();
 
