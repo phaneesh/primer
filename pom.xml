@@ -59,6 +59,7 @@
         <dropwizard.version>1.0.0</dropwizard.version>
         <dropwizard.swagger.version>1.0.0-1</dropwizard.swagger.version>
         <dropwizard.servicediscovery>1.0.0-SNAPSHOT</dropwizard.servicediscovery>
+        <riemann.version>1.0.0-SNAPSHOT</riemann.version>
         <hystrix.dropwizard.version>0.4</hystrix.dropwizard.version>
         <hystrix.configurator.version>0.0.3</hystrix.configurator.version>
         <aerospike.version>3.2.4</aerospike.version>
@@ -121,6 +122,11 @@
             <groupId>io.dropwizard.discovery</groupId>
             <artifactId>dropwizard-service-discovery-bundle</artifactId>
             <version>${dropwizard.servicediscovery}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-riemann</artifactId>
+            <version>${riemann.version}</version>
         </dependency>
         <dependency>
             <groupId>com.hystrix</groupId>

@@ -59,7 +59,7 @@ public class GetStaticTokenCommand extends BaseCommand<StaticToken> {
     protected StaticToken run() throws PrimerException {
         Callable<StaticToken> callable = () -> {
             final Key key = new Key(aerospikeConfig.getNamespace(), String.format("%s_static_tokens", app), id);
-            final Record record = AerospikeConnectionManager.getClient().get(null, key, "token", "subject", "enabled", "role");
+            final Record record = AerospikeConnectionManager.getClient().get(null, key);
             if (null == record) {
                 return null;
             }

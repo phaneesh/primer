@@ -24,6 +24,8 @@ import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.discovery.bundle.ServiceDiscoveryBundle;
 import io.dropwizard.discovery.bundle.ServiceDiscoveryConfiguration;
 import io.dropwizard.lifecycle.Managed;
+import io.dropwizard.riemann.RiemannBundle;
+import io.dropwizard.riemann.RiemannConfig;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
@@ -85,6 +87,12 @@ public class PrimerApp extends Application<PrimerConfiguration> {
             }
         };
         bootstrap.addBundle(serviceDiscoveryBundle);
+        bootstrap.addBundle(new RiemannBundle<PrimerConfiguration>() {
+            @Override
+            public RiemannConfig getRiemannConfiguration(PrimerConfiguration apiConfiguration) {
+                return apiConfiguration.getRiemann();
+            }
+        });
     }
 
     @Override

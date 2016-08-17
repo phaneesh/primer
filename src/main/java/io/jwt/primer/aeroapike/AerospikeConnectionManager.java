@@ -58,12 +58,14 @@ public class AerospikeConnectionManager {
         readPolicy.replica = Replica.RANDOM;
         readPolicy.sleepBetweenRetries = config.getSleepBetweenRetries();
         readPolicy.timeout = config.getTimeout();
+        readPolicy.sendKey = true;
 
         val writePolicy = new WritePolicy();
         writePolicy.maxRetries = config.getRetries();
         writePolicy.consistencyLevel = ConsistencyLevel.CONSISTENCY_ALL;
         writePolicy.replica = Replica.MASTER;
         writePolicy.sleepBetweenRetries = config.getSleepBetweenRetries();
+        writePolicy.commitLevel = CommitLevel.COMMIT_ALL;
         writePolicy.timeout = config.getTimeout();
 
         val clientPolicy = new ClientPolicy();
@@ -72,7 +74,6 @@ public class AerospikeConnectionManager {
         clientPolicy.writePolicyDefault = writePolicy;
         clientPolicy.failIfNotConnected = true;
         clientPolicy.maxSocketIdle = config.getMaxSocketIdle();
-        clientPolicy.threadPool = Executors.newFixedThreadPool(config.getMaxConnectionsPerNode() * hosts.length);
 
         client = new AerospikeClient(clientPolicy, hostAddresses.toArray(new Host[0]));
         log.info("Aerospike connection status: " +client.isConnected());
