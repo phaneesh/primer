@@ -1,9 +1,11 @@
 server:
   requestLog:
     appenders:
-        - type: console
-          threshold: INFO
-          timeZone: IST
+      - type: console
+        queueSize: 2048
+        threshold: INFO
+        timeZone: IST
+        logFormat: "%i{X-CLIENT-IP} %l %u %t \"%r\" %s %b \"%i{Referer}\" \"%i{User-Agent}\" %D"
   applicationConnectors:
     - type: http
       port: 8080
