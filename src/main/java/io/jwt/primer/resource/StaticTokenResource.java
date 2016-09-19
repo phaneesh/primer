@@ -69,6 +69,9 @@ public class StaticTokenResource {
         try {
             return PrimerCommands.generateStatic(aerospikeConfig, app, id, role, signer);
         } catch (Exception e) {
+            if(org.apache.commons.lang.exception.ExceptionUtils.getRootCause(e) instanceof PrimerException) {
+                throw (PrimerException) org.apache.commons.lang.exception.ExceptionUtils.getRootCause(e);
+            }
             log.error("Error generating token", e);
             throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR000", e.getMessage());
         }
@@ -87,6 +90,9 @@ public class StaticTokenResource {
         try {
             return PrimerCommands.disableStatic(aerospikeConfig, app, id);
         } catch (Exception e) {
+            if(org.apache.commons.lang.exception.ExceptionUtils.getRootCause(e) instanceof PrimerException) {
+                throw (PrimerException) org.apache.commons.lang.exception.ExceptionUtils.getRootCause(e);
+            }
             log.error("Error disabling token", e);
             throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR000", e.getMessage());
         }
