@@ -60,6 +60,7 @@
         <dropwizard.swagger.version>1.0.0-1</dropwizard.swagger.version>
         <dropwizard.servicediscovery>1.0.0-SNAPSHOT</dropwizard.servicediscovery>
         <riemann.version>1.0.0-SNAPSHOT</riemann.version>
+        <dropwizard.oor>1.0.0-SNAPSHOT</dropwizard.oor>
         <hystrix.dropwizard.version>0.4</hystrix.dropwizard.version>
         <hystrix.configurator.version>0.0.5</hystrix.configurator.version>
         <hystrix.wrapper.version>1.0-SNAPSHOT</hystrix.wrapper.version>
@@ -87,7 +88,11 @@
             <artifactId>dropwizard-auth</artifactId>
             <version>${dropwizard.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-oor</artifactId>
+            <version>${dropwizard.oor}</version>
+        </dependency>
         <dependency>
             <groupId>com.smoketurner</groupId>
             <artifactId>dropwizard-swagger</artifactId>
