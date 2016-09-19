@@ -48,110 +48,46 @@ public interface PrimerCommands {
     Retryer<TokenClearResponse> clearRetryer = RetryerBuilder.<TokenClearResponse>newBuilder()
             .retryIfExceptionOfType(RuntimeException.class)
             .withStopStrategy(StopStrategies.stopAfterAttempt(3))
-            .withRetryListener(new RetryListener() {
-                @Override
-                public <V> void onRetry(Attempt<V> attempt) {
-                    log.warn("Retrying clear dynamic token. Attempt: {} | Cause: {}", attempt.getAttemptNumber(),
-                            attempt.getExceptionCause().getMessage());
-                }
-            })
             .build();
 
     Retryer<TokenDisableResponse> disableDynamicRetryer = RetryerBuilder.<TokenDisableResponse>newBuilder()
             .retryIfExceptionOfType(RuntimeException.class)
             .withStopStrategy(StopStrategies.stopAfterAttempt(3))
-            .withRetryListener(new RetryListener() {
-                @Override
-                public <V> void onRetry(Attempt<V> attempt) {
-                    log.warn("Retrying disable dynamic token. Attempt: {} | Cause: {}", attempt.getAttemptNumber(),
-                            attempt.getExceptionCause().getMessage());
-                }
-            })
             .build();
 
     Retryer<StaticTokenResponse> disableStaticRetryer = RetryerBuilder.<StaticTokenResponse>newBuilder()
             .retryIfExceptionOfType(RuntimeException.class)
             .withStopStrategy(StopStrategies.stopAfterAttempt(3))
-            .withRetryListener(new RetryListener() {
-                @Override
-                public <V> void onRetry(Attempt<V> attempt) {
-                    log.warn("Retrying disabling static token. Attempt: {} | Cause: {}", attempt.getAttemptNumber(),
-                            attempt.getExceptionCause().getMessage());
-                }
-            })
             .build();
 
     Retryer<TokenExpireResponse> expireDynamicRetryer = RetryerBuilder.<TokenExpireResponse>newBuilder()
             .retryIfExceptionOfType(RuntimeException.class)
             .withStopStrategy(StopStrategies.stopAfterAttempt(3))
-            .withRetryListener(new RetryListener() {
-                @Override
-                public <V> void onRetry(Attempt<V> attempt) {
-                    log.warn("Retrying expire dynamic token. Attempt: {} | Cause: {}", attempt.getAttemptNumber(),
-                            attempt.getExceptionCause().getMessage());
-                }
-            })
             .build();
 
     Retryer<TokenResponse> generateDynamicRetryer = RetryerBuilder.<TokenResponse>newBuilder()
             .retryIfExceptionOfType(RuntimeException.class)
             .withStopStrategy(StopStrategies.stopAfterAttempt(3))
-            .withRetryListener(new RetryListener() {
-                @Override
-                public <V> void onRetry(Attempt<V> attempt) {
-                    log.warn("Retrying generate dynamic token. Attempt: {} | Cause: {}", attempt.getAttemptNumber(),
-                            attempt.getExceptionCause().getMessage());
-                }
-            })
             .build();
 
     Retryer<StaticTokenResponse> generateStaticRetryer = RetryerBuilder.<StaticTokenResponse>newBuilder()
             .retryIfExceptionOfType(RuntimeException.class)
             .withStopStrategy(StopStrategies.stopAfterAttempt(3))
-            .withRetryListener(new RetryListener() {
-                @Override
-                public <V> void onRetry(Attempt<V> attempt) {
-                    log.warn("Retrying generate static token. Attempt: {} | Cause: {}", attempt.getAttemptNumber(),
-                            attempt.getExceptionCause().getMessage());
-                }
-            })
             .build();
 
     Retryer<DynamicToken> getDynamicRetryer = RetryerBuilder.<DynamicToken>newBuilder()
             .retryIfExceptionOfType(RuntimeException.class)
             .withStopStrategy(StopStrategies.stopAfterAttempt(3))
-            .withRetryListener(new RetryListener() {
-                @Override
-                public <V> void onRetry(Attempt<V> attempt) {
-                    log.warn("Retrying get dynamic token. Attempt: {} | Cause: {}", attempt.getAttemptNumber(),
-                            attempt.getExceptionCause().getMessage());
-                }
-            })
-            .withWaitStrategy(WaitStrategies.noWait())
             .build();
 
     Retryer<StaticToken> getStaticRetryer = RetryerBuilder.<StaticToken>newBuilder()
             .retryIfExceptionOfType(RuntimeException.class)
             .withStopStrategy(StopStrategies.stopAfterAttempt(3))
-            .withRetryListener(new RetryListener() {
-                @Override
-                public <V> void onRetry(Attempt<V> attempt) {
-                    log.warn("Retrying get static token. Attempt: {} | Cause: {}", attempt.getAttemptNumber(),
-                            attempt.getExceptionCause().getMessage());
-                }
-            })
             .build();
 
     Retryer<RefreshResponse> refreshDynamicRetryer = RetryerBuilder.<RefreshResponse>newBuilder()
             .retryIfExceptionOfType(RuntimeException.class)
             .withStopStrategy(StopStrategies.stopAfterAttempt(3))
-            .withRetryListener(new RetryListener() {
-                @Override
-                public <V> void onRetry(Attempt<V> attempt) {
-                    log.warn("Retrying refresh dynamic token. Attempt: {} | Cause: {}", attempt.getAttemptNumber(),
-                            attempt.getExceptionCause().getMessage());
-                }
-            })
             .build();
 
 
