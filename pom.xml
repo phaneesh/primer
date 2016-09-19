@@ -61,7 +61,8 @@
         <dropwizard.servicediscovery>1.0.0-SNAPSHOT</dropwizard.servicediscovery>
         <riemann.version>1.0.0-SNAPSHOT</riemann.version>
         <hystrix.dropwizard.version>0.4</hystrix.dropwizard.version>
-        <hystrix.configurator.version>0.0.3</hystrix.configurator.version>
+        <hystrix.configurator.version>0.0.5</hystrix.configurator.version>
+        <hystrix.wrapper.version>1.0-SNAPSHOT</hystrix.wrapper.version>
         <aerospike.version>3.2.5</aerospike.version>
         <slf4j.version>1.7.19</slf4j.version>
         <aerospike.mock>0.0.5</aerospike.mock>
@@ -132,6 +133,11 @@
             <groupId>com.hystrix</groupId>
             <artifactId>hystrix-configurator</artifactId>
             <version>${hystrix.configurator.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.appform.core</groupId>
+            <artifactId>hystrix-function-wrapper</artifactId>
+            <version>${hystrix.wrapper.version}</version>
         </dependency>
         <dependency>
             <groupId>com.aerospike</groupId>

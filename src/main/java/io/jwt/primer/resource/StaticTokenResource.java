@@ -19,9 +19,7 @@ package io.jwt.primer.resource;
 import com.codahale.metrics.annotation.Metered;
 import com.github.toastshaman.dropwizard.auth.jwt.hmac.HmacSHA512Signer;
 import com.google.common.base.Charsets;
-import io.jwt.primer.command.DisableStaticCommand;
-import io.jwt.primer.command.GenerateStaticCommand;
-import io.jwt.primer.command.GetStaticTokenCommand;
+import io.jwt.primer.command.PrimerCommands;
 import io.jwt.primer.config.AerospikeConfig;
 import io.jwt.primer.exception.PrimerException;
 import io.jwt.primer.model.PrimerError;
@@ -34,6 +32,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+
 import javax.inject.Singleton;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -68,8 +67,7 @@ public class StaticTokenResource {
     @Metered
     public StaticTokenResponse generate(@PathParam("app") String app, @PathParam("id") String id, @PathParam("role") String role) throws PrimerException {
         try {
-            GenerateStaticCommand generateStaticCommand = new GenerateStaticCommand(signer, aerospikeConfig, id, app, role);
-            return generateStaticCommand.queue().get();
+            return PrimerCommands.generateStatic(aerospikeConfig, app, id, role, signer);
         } catch (Exception e) {
             log.error("Error generating token", e);
             throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR000", e.getMessage());
@@ -77,7 +75,7 @@ public class StaticTokenResource {
     }
 
     @POST
-    @Path("/v1/disable/static/{app}/{id}")
+    @Path("/v1/disableDynamic/static/{app}/{id}")
     @ApiOperation(value = "Disable a static JWT token for given user")
     @ApiResponses({
             @ApiResponse(code = 200, response = StaticTokenResponse.class, message = "Success"),
@@ -87,13 +85,9 @@ public class StaticTokenResource {
     public StaticTokenResponse disable(@PathParam("id") String id,
                                         @PathParam("app") String app) throws PrimerException {
         try {
-            DisableStaticCommand disableCommand = new DisableStaticCommand(aerospikeConfig, app, id);
-            return disableCommand.queue().get();
+            return PrimerCommands.disableStatic(aerospikeConfig, app, id);
         } catch (Exception e) {
             log.error("Error disabling token", e);
-            if(ExceptionUtils.getRootCause(e) instanceof PrimerException) {
-                throw (PrimerException)ExceptionUtils.getRootCause(e);
-            }
             throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR000", e.getMessage());
         }
     }
@@ -112,8 +106,7 @@ public class StaticTokenResource {
     public VerifyStaticResponse verify(@HeaderParam("X-Auth-Token") String token, @PathParam("app") String app,
                                  @PathParam("id") String id, @PathParam("role") String role) throws PrimerException {
         try {
-            GetStaticTokenCommand getStaticTokenCommand = new GetStaticTokenCommand(aerospikeConfig, id, app);
-            StaticToken staticToken = getStaticTokenCommand.queue().get();
+            StaticToken staticToken = PrimerCommands.getStatic(aerospikeConfig, id, app);
             if (null == staticToken) {
                 throw new PrimerException(Response.Status.NOT_FOUND.getStatusCode(), "PR001", "Not Found");
             }
@@ -121,7 +114,7 @@ public class StaticTokenResource {
                 throw new PrimerException(Response.Status.FORBIDDEN.getStatusCode(), "PR002", "Forbidden");
             }
             if (token.equals(staticToken.getToken()) && id.equals(staticToken.getSubject())
-                    && role.equals(role)) {
+                    && role.equals(staticToken.getRole())) {
                 return VerifyStaticResponse.builder()
                         .token(staticToken.getToken())
                         .id(staticToken.getSubject())

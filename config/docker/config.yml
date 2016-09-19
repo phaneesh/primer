@@ -50,39 +50,39 @@ hystrix:
     threadPool:
       timeout: 1000
   commands:
-    - name: generate
+    - name: Dynamic.Generate
       threadPool:
         timeout: 500
         concurrency: 16
-    - name: disable
+    - name: Dynamic.Disable
       threadPool:
         timeout: 500
         concurrency: 4
-    - name: get_dynamic
+    - name: Dynamic.Get
       threadPool:
         timeout: 500
         concurrency: 16
-    - name: generate_static
+    - name: Static.Generate
       threadPool:
         timeout: 500
         concurrency: 4
-    - name: disable_static
+    - name: Static.Disable
       threadPool:
         timeout: 200
         concurrency: 4
-    - name: get_static
+    - name: Static.Get
       threadPool:
         timeout: 500
         concurrency: 16
-    - name: refresh
+    - name: Dynamic.Refresh
       threadPool:
         timeout: 500
         concurrency: 16
-    - name: expire
+    - name: Dynamic.Expire
       threadPool:
         timeout: 500
         concurrency: 4
-    - name: clear
+    - name: Dynamic.Clear
       threadPool:
         timeout: 500
         concurrency: 4

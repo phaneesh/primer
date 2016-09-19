@@ -22,7 +22,7 @@ import com.github.srini156.aerospike.client.MockAerospikeClient;
 import com.hystrix.configurator.config.HystrixCommandConfig;
 import com.hystrix.configurator.config.HystrixConfig;
 import com.hystrix.configurator.config.ThreadPoolConfig;
-import com.hystrix.configurator.core.HystrixConfigutationFactory;
+import com.hystrix.configurator.core.HystrixConfigurationFactory;
 import io.dropwizard.Configuration;
 import io.dropwizard.jersey.DropwizardResourceConfig;
 import io.dropwizard.jersey.setup.JerseyEnvironment;
@@ -58,49 +58,49 @@ public class BaseTest {
 
         private HystrixConfig hystrix = HystrixConfig.builder()
                 .command(HystrixCommandConfig.builder()
-                        .name("generate")
+                        .name("Dynamic.Generate")
                         .threadPool(ThreadPoolConfig.builder()
                                 .concurrency(4)
                                 .timeout(1000)
                                 .build())
                         .build())
                 .command(HystrixCommandConfig.builder()
-                        .name("generate_static")
+                        .name("Static.Generate")
                         .threadPool(ThreadPoolConfig.builder()
                                 .concurrency(4)
                                 .timeout(1000)
                                 .build())
                         .build())
                 .command(HystrixCommandConfig.builder()
-                        .name("get_dynamic")
+                        .name("Dynamic.Get")
                         .threadPool(ThreadPoolConfig.builder()
                                 .concurrency(4)
                                 .timeout(1000)
                                 .build())
                         .build())
                 .command(HystrixCommandConfig.builder()
-                        .name("get_static")
+                        .name("Static.Get")
                         .threadPool(ThreadPoolConfig.builder()
                                 .concurrency(4)
                                 .timeout(1000)
                                 .build())
                         .build())
                 .command(HystrixCommandConfig.builder()
-                        .name("refresh")
+                        .name("Dynamic.Refresh")
                         .threadPool(ThreadPoolConfig.builder()
                                 .concurrency(4)
                                 .timeout(1000)
                                 .build())
                         .build())
                 .command(HystrixCommandConfig.builder()
-                        .name("disable")
+                        .name("Dynamic.Disable")
                         .threadPool(ThreadPoolConfig.builder()
                                 .concurrency(4)
                                 .timeout(1000)
                                 .build())
                         .build())
                 .command(HystrixCommandConfig.builder()
-                        .name("disable_static")
+                        .name("Static.Disable")
                         .threadPool(ThreadPoolConfig.builder()
                                 .concurrency(4)
                                 .timeout(1000)
@@ -144,7 +144,7 @@ public class BaseTest {
         hystrixBundle.initialize(bootstrap);
         hystrixBundle.run(environment);
 
-        HystrixConfigutationFactory.init(config.hystrix);
+        HystrixConfigurationFactory.init(config.hystrix);
 
         MockAerospikeClient aerospikeClient = new MockAerospikeClient();
         AerospikeConnectionManager.setClient(aerospikeClient);

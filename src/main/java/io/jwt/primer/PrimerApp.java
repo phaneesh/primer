@@ -17,7 +17,7 @@
 package io.jwt.primer;
 
 import com.codahale.metrics.health.HealthCheck;
-import com.hystrix.configurator.core.HystrixConfigutationFactory;
+import com.hystrix.configurator.core.HystrixConfigurationFactory;
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
@@ -97,7 +97,7 @@ public class PrimerApp extends Application<PrimerConfiguration> {
 
     @Override
     public void run(PrimerConfiguration configuration, Environment environment) throws Exception {
-        HystrixConfigutationFactory.init(configuration.getHystrix());
+        HystrixConfigurationFactory.init(configuration.getHystrix());
         environment.lifecycle().manage(new Managed() {
             @Override
             public void start() throws Exception {
