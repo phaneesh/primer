@@ -20,13 +20,16 @@ import com.aerospike.client.Bin;
 import com.aerospike.client.Key;
 import com.aerospike.client.Operation;
 import com.aerospike.client.Record;
+import com.github.rholder.retry.Retryer;
+import com.github.rholder.retry.RetryerBuilder;
+import com.github.rholder.retry.StopStrategies;
 import com.hystrix.configurator.core.BaseCommand;
 import io.jwt.primer.aeroapike.AerospikeConnectionManager;
 import io.jwt.primer.config.AerospikeConfig;
 import io.jwt.primer.exception.PrimerException;
 import io.jwt.primer.model.StaticTokenResponse;
 
-import javax.ws.rs.core.Response;
+import java.util.concurrent.Callable;
 
 /**
  * @author phaneesh
@@ -39,6 +42,12 @@ public class DisableStaticCommand extends BaseCommand<StaticTokenResponse> {
 
     private final String id;
 
+    private final Retryer<StaticTokenResponse> tokenRetryer = RetryerBuilder.<StaticTokenResponse>newBuilder()
+            .retryIfExceptionOfType(RuntimeException.class)
+            .withStopStrategy(StopStrategies.stopAfterAttempt(3))
+            .build();
+
+
     public DisableStaticCommand(final AerospikeConfig aerospikeConfig, final String app, final String id) {
         super("disable_static");
         this.aerospikeConfig = aerospikeConfig;
@@ -48,16 +57,23 @@ public class DisableStaticCommand extends BaseCommand<StaticTokenResponse> {
 
     @Override
     protected StaticTokenResponse run() throws PrimerException {
-        final Key key = new Key(aerospikeConfig.getNamespace(), String.format("%s_static_tokens", app), id);
-        final Record record = AerospikeConnectionManager.getClient().get(null, key, "token");
-        if (null == record) {
-            return null;
+        Callable<StaticTokenResponse> callable = () -> {
+            final Key key = new Key(aerospikeConfig.getNamespace(), String.format("%s_static_tokens", app), id);
+            final Record record = AerospikeConnectionManager.getClient().get(null, key, "token");
+            if (null == record) {
+                return null;
+            }
+            final Bin enabledBin = new Bin("enabled", false);
+            AerospikeConnectionManager.getClient().operate(null, key, Operation.put(enabledBin));
+            return StaticTokenResponse.builder()
+                    .token(record.getString("token"))
+                    .build();
+        };
+        try {
+            return tokenRetryer.call(callable);
+        } catch (Exception e) {
+            throw new PrimerException(500, "PR000", e.getMessage());
         }
-        final Bin enabledBin = new Bin("enabled", false);
-        AerospikeConnectionManager.getClient().operate(null, key, Operation.put(enabledBin));
-        return StaticTokenResponse.builder()
-                .token(record.getString("token"))
-                .build();
     }
 
 }

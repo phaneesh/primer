@@ -19,7 +19,9 @@ package io.jwt.primer.command;
 import com.aerospike.client.Bin;
 import com.aerospike.client.Key;
 import com.aerospike.client.Operation;
-import com.aerospike.client.Record;
+import com.github.rholder.retry.Retryer;
+import com.github.rholder.retry.RetryerBuilder;
+import com.github.rholder.retry.StopStrategies;
 import com.github.toastshaman.dropwizard.auth.jwt.hmac.HmacSHA512Signer;
 import com.github.toastshaman.dropwizard.auth.jwt.model.JsonWebToken;
 import com.hystrix.configurator.core.BaseCommand;
@@ -32,7 +34,7 @@ import io.jwt.primer.model.RefreshResponse;
 import io.jwt.primer.model.ServiceUser;
 import io.jwt.primer.util.TokenUtil;
 
-import javax.ws.rs.core.Response;
+import java.util.concurrent.Callable;
 
 /**
  * @author phaneesh
@@ -51,6 +53,12 @@ public class RefreshCommand extends BaseCommand<RefreshResponse> {
 
     private DynamicToken token;
 
+    private final Retryer<RefreshResponse> tokenRetryer = RetryerBuilder.<RefreshResponse>newBuilder()
+            .retryIfExceptionOfType(RuntimeException.class)
+            .withStopStrategy(StopStrategies.stopAfterAttempt(3))
+            .build();
+
+
     public RefreshCommand(final HmacSHA512Signer signer, final JwtConfig jwtConfig,
                           final AerospikeConfig aerospikeConfig,
                           final String id, final String app, final DynamicToken token) {
@@ -65,32 +73,39 @@ public class RefreshCommand extends BaseCommand<RefreshResponse> {
 
     @Override
     protected RefreshResponse run() throws PrimerException {
-        final Key key = new Key(aerospikeConfig.getNamespace(), String.format("%s_tokens", app), id);
-        final ServiceUser serviceUser = ServiceUser.builder()
-                .id(token.getSubject())
-                .role(token.getRole())
-                .name(token.getName())
-                .build();
-        final JsonWebToken newToken = TokenUtil.token(app, id, serviceUser, jwtConfig);
-        final String newRefreshToken = TokenUtil.refreshToken(app, id, jwtConfig, newToken);
-        final String newSignedToken = signer.sign(newToken);
-        final Bin tokenBin = new Bin("token", newSignedToken);
-        final Bin refreshTokenBin = new Bin("refresh_token", newRefreshToken);
-        final Bin issuedAtBin = new Bin("issued_at", newToken.claim().issuedAt());
-        final Bin expiresAtBin = new Bin("expires_at", newToken.claim().expiration());
-        final Bin previousRefreshToken = new Bin("refresh_tokenp", token.getRefreshToken());
-        final Bin previousToken = new Bin("tokenp", token.getToken());
-        AerospikeConnectionManager.getClient().operate(null, key,
-                Operation.put(tokenBin),
-                Operation.put(previousToken),
-                Operation.put(refreshTokenBin),
-                Operation.put(previousRefreshToken),
-                Operation.put(issuedAtBin),
-                Operation.put(expiresAtBin));
-        return RefreshResponse.builder()
-                .token(newSignedToken)
-                .refreshToken(newRefreshToken)
-                .expiresAt(newToken.claim().expiration())
-                .build();
+        Callable<RefreshResponse> callable = () -> {
+            final Key key = new Key(aerospikeConfig.getNamespace(), String.format("%s_tokens", app), id);
+            final ServiceUser serviceUser = ServiceUser.builder()
+                    .id(token.getSubject())
+                    .role(token.getRole())
+                    .name(token.getName())
+                    .build();
+            final JsonWebToken newToken = TokenUtil.token(app, id, serviceUser, jwtConfig);
+            final String newRefreshToken = TokenUtil.refreshToken(app, id, jwtConfig, newToken);
+            final String newSignedToken = signer.sign(newToken);
+            final Bin tokenBin = new Bin("token", newSignedToken);
+            final Bin refreshTokenBin = new Bin("refresh_token", newRefreshToken);
+            final Bin issuedAtBin = new Bin("issued_at", newToken.claim().issuedAt());
+            final Bin expiresAtBin = new Bin("expires_at", newToken.claim().expiration());
+            final Bin previousRefreshToken = new Bin("refresh_tokenp", token.getRefreshToken());
+            final Bin previousToken = new Bin("tokenp", token.getToken());
+            AerospikeConnectionManager.getClient().operate(null, key,
+                    Operation.put(tokenBin),
+                    Operation.put(previousToken),
+                    Operation.put(refreshTokenBin),
+                    Operation.put(previousRefreshToken),
+                    Operation.put(issuedAtBin),
+                    Operation.put(expiresAtBin));
+            return RefreshResponse.builder()
+                    .token(newSignedToken)
+                    .refreshToken(newRefreshToken)
+                    .expiresAt(newToken.claim().expiration())
+                    .build();
+        };
+        try {
+            return tokenRetryer.call(callable);
+        } catch (Exception e) {
+            throw new PrimerException(500, "PR000", e.getMessage());
+        }
     }
 }

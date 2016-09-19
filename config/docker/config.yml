@@ -1,4 +1,9 @@
 server:
+  requestLog:
+    appenders:
+        - type: console
+          threshold: INFO
+          timeZone: IST
   applicationConnectors:
     - type: http
       port: 8080
@@ -47,19 +52,19 @@ hystrix:
   commands:
     - name: generate
       threadPool:
-        timeout: 200
-        concurrency: 4
+        timeout: 500
+        concurrency: 16
     - name: disable
       threadPool:
-        timeout: 200
+        timeout: 500
         concurrency: 4
     - name: get_dynamic
       threadPool:
-        timeout: 100
-        concurrency: 4
+        timeout: 500
+        concurrency: 16
     - name: generate_static
       threadPool:
-        timeout: 200
+        timeout: 500
         concurrency: 4
     - name: disable_static
       threadPool:
@@ -67,19 +72,19 @@ hystrix:
         concurrency: 4
     - name: get_static
       threadPool:
-        timeout: 100
-        concurrency: 4
+        timeout: 500
+        concurrency: 16
     - name: refresh
       threadPool:
-        timeout: 200
-        concurrency: 4
+        timeout: 500
+        concurrency: 16
     - name: expire
       threadPool:
-        timeout: 100
-        concurrency: 1
+        timeout: 500
+        concurrency: 4
     - name: clear
       threadPool:
-        timeout: 100
+        timeout: 500
         concurrency: 4
 
 jwt:

@@ -62,7 +62,7 @@
         <riemann.version>1.0.0-SNAPSHOT</riemann.version>
         <hystrix.dropwizard.version>0.4</hystrix.dropwizard.version>
         <hystrix.configurator.version>0.0.3</hystrix.configurator.version>
-        <aerospike.version>3.2.4</aerospike.version>
+        <aerospike.version>3.2.5</aerospike.version>
         <slf4j.version>1.7.19</slf4j.version>
         <aerospike.mock>0.0.5</aerospike.mock>
         <dropwizard-auth-jwt.version>0.9.2-0</dropwizard-auth-jwt.version>
@@ -226,7 +226,7 @@
                                         <Main-Class>io.jwt.primer.PrimerApp</Main-Class>
                                         <Build-Number>${build.number}</Build-Number>
                                         <Git-Commit>${build.revision}</Git-Commit>
-                                    </manifestEntries>-
+                                    </manifestEntries>
                                 </transformer>
                             </transformers>
                         </configuration>
