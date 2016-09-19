@@ -106,7 +106,7 @@ public class StaticTokenResource {
     public VerifyStaticResponse verify(@HeaderParam("X-Auth-Token") String token, @PathParam("app") String app,
                                  @PathParam("id") String id, @PathParam("role") String role) throws PrimerException {
         try {
-            StaticToken staticToken = PrimerCommands.getStatic(aerospikeConfig, id, app);
+            StaticToken staticToken = PrimerCommands.getStatic(aerospikeConfig, app, id);
             if (null == staticToken) {
                 throw new PrimerException(Response.Status.NOT_FOUND.getStatusCode(), "PR001", "Not Found");
             }
