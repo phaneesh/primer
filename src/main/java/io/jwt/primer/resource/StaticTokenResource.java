@@ -26,12 +26,12 @@ import io.jwt.primer.model.PrimerError;
 import io.jwt.primer.model.StaticToken;
 import io.jwt.primer.model.StaticTokenResponse;
 import io.jwt.primer.model.VerifyStaticResponse;
+import io.jwt.primer.util.PrimerExceptionUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import javax.inject.Singleton;
 import javax.ws.rs.*;
@@ -69,9 +69,7 @@ public class StaticTokenResource {
         try {
             return PrimerCommands.generateStatic(aerospikeConfig, app, id, role, signer);
         } catch (Exception e) {
-            if(org.apache.commons.lang.exception.ExceptionUtils.getRootCause(e) instanceof PrimerException) {
-                throw (PrimerException) org.apache.commons.lang.exception.ExceptionUtils.getRootCause(e);
-            }
+            PrimerExceptionUtil.handleException(e);
             log.error("Error generating token", e);
             throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR000", e.getMessage());
         }
@@ -90,9 +88,7 @@ public class StaticTokenResource {
         try {
             return PrimerCommands.disableStatic(aerospikeConfig, app, id);
         } catch (Exception e) {
-            if(org.apache.commons.lang.exception.ExceptionUtils.getRootCause(e) instanceof PrimerException) {
-                throw (PrimerException) org.apache.commons.lang.exception.ExceptionUtils.getRootCause(e);
-            }
+            PrimerExceptionUtil.handleException(e);
             log.error("Error disabling token", e);
             throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR000", e.getMessage());
         }
@@ -130,10 +126,8 @@ public class StaticTokenResource {
                 throw new PrimerException(Response.Status.UNAUTHORIZED.getStatusCode(), "PR004", "Unauthorized");
             }
         } catch (Exception e) {
+            PrimerExceptionUtil.handleException(e);
             log.error("Error verifying token", e);
-            if(ExceptionUtils.getRootCause(e) instanceof PrimerException) {
-                throw (PrimerException)ExceptionUtils.getRootCause(e);
-            }
             throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR001", "Error");
         }
     }

@@ -25,6 +25,7 @@ import io.jwt.primer.config.AerospikeConfig;
 import io.jwt.primer.config.JwtConfig;
 import io.jwt.primer.exception.PrimerException;
 import io.jwt.primer.model.*;
+import io.jwt.primer.util.PrimerExceptionUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -75,9 +76,7 @@ public class TokenResource {
         try {
             return PrimerCommands.generateDynamic(aerospikeConfig, app, id, user, jwtConfig, signer);
         } catch (Exception e) {
-            if(ExceptionUtils.getRootCause(e) instanceof PrimerException) {
-                throw (PrimerException)ExceptionUtils.getRootCause(e);
-            }
+            PrimerExceptionUtil.handleException(e);
             log.error("Execution Error generating token", e);
             throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR001", "Error");
         }
@@ -100,9 +99,7 @@ public class TokenResource {
             }
             return response;
         } catch (Exception e) {
-            if(ExceptionUtils.getRootCause(e) instanceof PrimerException) {
-                throw (PrimerException)ExceptionUtils.getRootCause(e);
-            }
+            PrimerExceptionUtil.handleException(e);
             log.error("Execution Error disabling token", e);
             throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR001", "Error");
         }
@@ -125,9 +122,7 @@ public class TokenResource {
             }
             return response;
         } catch (Exception e) {
-            if(ExceptionUtils.getRootCause(e) instanceof PrimerException) {
-                throw (PrimerException)ExceptionUtils.getRootCause(e);
-            }
+            PrimerExceptionUtil.handleException(e);
             log.error("Execution Error clearing token", e);
             throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR001", "Error");
         }
@@ -151,9 +146,7 @@ public class TokenResource {
             }
             return response;
         } catch (Exception e) {
-            if(ExceptionUtils.getRootCause(e) instanceof PrimerException) {
-                throw (PrimerException)ExceptionUtils.getRootCause(e);
-            }
+            PrimerExceptionUtil.handleException(e);
             log.error("Execution Error disabling token", e);
             throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR001", "Error");
         }
@@ -176,9 +169,7 @@ public class TokenResource {
                 throw new PrimerException(Response.Status.NOT_FOUND.getStatusCode(), "PR001", "Not Found");
             return dynamicToken;
         } catch (Exception e) {
-            if(ExceptionUtils.getRootCause(e) instanceof PrimerException) {
-                throw (PrimerException)ExceptionUtils.getRootCause(e);
-            }
+            PrimerExceptionUtil.handleException(e);
             log.error("Execution Error getting token", e);
             throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR001", "Error");
         }
@@ -221,9 +212,7 @@ public class TokenResource {
                 throw new PrimerException(Response.Status.UNAUTHORIZED.getStatusCode(), "PR004", "Unauthorized");
             }
         } catch (Exception e) {
-            if(ExceptionUtils.getRootCause(e) instanceof PrimerException) {
-                throw (PrimerException)ExceptionUtils.getRootCause(e);
-            }
+            PrimerExceptionUtil.handleException(e);
             log.error("Execution Error verifying token", e);
             throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR001", "Error");
         }
@@ -253,12 +242,12 @@ public class TokenResource {
                 throw new PrimerException(Response.Status.UNAUTHORIZED.getStatusCode(), "PR004", "Unauthorized");
             }
         } catch (Exception e) {
-            if(ExceptionUtils.getRootCause(e) instanceof PrimerException) {
-                throw (PrimerException)ExceptionUtils.getRootCause(e);
-            }
+            PrimerExceptionUtil.handleException(e);
             log.error("Execution Error refreshing token", e);
             throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR001", "Error");
         }
     }
+
+
 
 }
