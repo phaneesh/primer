@@ -43,9 +43,9 @@ public class AerospikeConnectionManager {
         config = aerospikeConfig;
 
         val hosts = config.getHosts().split(",");
-        val hostAddresses = Arrays.stream(hosts).map( h -> {
+        val hostAddresses = Arrays.stream(hosts).map(h -> {
             String host[] = h.split(":");
-            if(host.length == 2) {
+            if (host.length == 2) {
                 return new Host(host[0], Integer.parseInt(host[1]));
             } else {
                 return new Host(host[0], 3000);
@@ -79,7 +79,11 @@ public class AerospikeConnectionManager {
         clientPolicy.threadPool = Executors.newFixedThreadPool(config.getThreadPoolSize());
 
         client = new AerospikeClient(clientPolicy, hostAddresses.toArray(new Host[0]));
-        log.info("Aerospike connection status: " +client.isConnected());
+        log.info("************************* Nodes *******************************");
+        client.getNodeNames().forEach(n -> log.info("Node: {}", n));
+        log.info("***************************************************************");
+        log.info("Aerospike connection status: " + client.isConnected());
+        log.info("***************************************************************");
     }
 
     public static IAerospikeClient getClient() {
@@ -92,7 +96,7 @@ public class AerospikeConnectionManager {
     }
 
     public static void close() {
-        if(null != client) {
+        if (null != client) {
             client.close();
         }
     }
