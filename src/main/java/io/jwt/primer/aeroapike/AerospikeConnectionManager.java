@@ -76,7 +76,7 @@ public class AerospikeConnectionManager {
         clientPolicy.failIfNotConnected = true;
         clientPolicy.maxSocketIdle = config.getMaxSocketIdle();
         clientPolicy.requestProleReplicas = true;
-        clientPolicy.threadPool = Executors.newFixedThreadPool(128);
+        clientPolicy.threadPool = Executors.newFixedThreadPool(config.getThreadPoolSize());
 
         client = new AerospikeClient(clientPolicy, hostAddresses.toArray(new Host[0]));
         log.info("Aerospike connection status: " +client.isConnected());

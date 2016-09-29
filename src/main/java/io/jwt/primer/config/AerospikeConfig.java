@@ -43,4 +43,11 @@ public class AerospikeConfig {
     private int sleepBetweenRetries;
 
     private int maxSocketIdle = 4140;
+
+    private int threadPoolSize = 512;
+
+    public static class AerospikeConfigBuilder {
+        private int maxSocketIdle = 4140;
+        private int threadPoolSize = 512;
+    }
 }
