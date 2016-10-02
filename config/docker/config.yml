@@ -1,4 +1,11 @@
 server:
+  requestLog:
+    appenders:
+      - type: console
+        queueSize: 2048
+        threshold: INFO
+        timeZone: IST
+        logFormat: "%i{X-CLIENT-IP} %l %u %t \"%r\" %s %b \"%i{Referer}\" \"%i{User-Agent}\" %D"
   applicationConnectors:
     - type: http
       port: 8080
@@ -15,11 +22,21 @@ logging:
   appenders:
     - type: console
       threshold: INFO
+      timeZone: IST
 
 swagger:
   resourcePackage: io.jwt.primer.resource
   title: Primer
   description: Low latency & interet scale JWT service
+
+riemann:
+  host: ${RIEMANN_HOST}
+  port: ${RIEMANN_PORT}
+  prefix: phonepe.${CONFIG_ENV}.primer
+  pollingInterval: 30
+  tags:
+    - auth
+    - primer
 
 aerospike:
   hosts: ${AEROSPIKE_HOST}
@@ -28,48 +45,50 @@ aerospike:
   timeout: ${AEROSPIKE_TIMEOUT}
   retries: ${AEROSPIKE_RETRIES}
   sleepBetweenRetries: ${AEROSPIKE_SLEEP_BETWEEN_RETRIES}
+  maxSocketIdle: ${AEROSPIKE_MAX_SOCKET_IDLE}
 
 hystrix:
   defaultConfig:
     threadPool:
       timeout: 1000
   commands:
-    - name: generate
+    - name: Dynamic.Generate
+      threadPool:
+        timeout: 500
+        concurrency: 16
+    - name: Dynamic.Disable
+      threadPool:
+        timeout: 500
+        concurrency: 4
+    - name: Dynamic.Get
+      threadPool:
+        timeout: 500
+        concurrency: 16
+    - name: Static.Generate
+      threadPool:
+        timeout: 500
+        concurrency: 4
+    - name: Static.Disable
       threadPool:
         timeout: 200
         concurrency: 4
-    - name: disable
+    - name: Static.Get
       threadPool:
-        timeout: 200
+        timeout: 500
+        concurrency: 16
+    - name: Dynamic.Refresh
+      threadPool:
+        timeout: 500
+        concurrency: 16
+    - name: Dynamic.Expire
+      threadPool:
+        timeout: 500
         concurrency: 4
-    - name: verify
+    - name: Dynamic.Clear
       threadPool:
-        timeout: 100
+        timeout: 500
         concurrency: 4
-    - name: generate_static
-      threadPool:
-        timeout: 200
-        concurrency: 4
-    - name: disable_static
-      threadPool:
-        timeout: 200
-        concurrency: 4
-    - name: verify_static
-      threadPool:
-        timeout: 100
-        concurrency: 4
-    - name: refresh
-      threadPool:
-        timeout: 200
-        concurrency: 4
-    - name: expire
-      threadPool:
-        timeout: 100
-        concurrency: 1
-    - name: get
-      threadPool:
-        timeout: 100
-        concurrency: 2
+
 jwt:
   privateKey: ${JWT_PRIVATE_KEY}
   clockSkew: ${JWT_CLOCK_SKEW}

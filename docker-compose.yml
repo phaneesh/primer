@@ -6,8 +6,13 @@ aerospike:
   volumes:
    - "$PWD/config/aerospike:/opt/aerospike/etc"
 
+zookeeper:
+  image: zookeeper
+  hostname: zookeeper
+  ports:
+    - "2181:2181"
 
-#heimdall compose
+#primer compose
 primer:
   container_name: primer
   build: .
@@ -18,6 +23,7 @@ primer:
    - /var/log/primer
   links:
    - aerospike
+   - zookeeper
 # enviroment valiables
   environment:
    - GC_ALGO=UseG1GC
@@ -29,7 +35,13 @@ primer:
    - AEROSPIKE_CONNECTION_PER_NODE=5
    - AEROSPIKE_TIMEOUT=1000
    - AEROSPIKE_RETRIES=3
-   - AEROSPIKE_SLEEP_BETWEEN_RETRIES=100
+   - AEROSPIKE_SLEEP_BETWEEN_RETRIES=10
+   - AEROSPIKE_MAX_SOCKET_IDLE=4400
    - JWT_PRIVATE_KEY=uL05wFbgtsW1IFRHOpIGn7PjLLwm1RiIDWubO4UqAU1OS4VhU6nnaIiJITLQ2Rqa
    - JWT_CLOCK_SKEW=60
    - JWT_EXPIRY=3600
+   - CONFIG_ENV=local
+   - ZK_CONNECTION_STRING=zookeeper:2181
+   - HOST=localhost
+   - PORT_8080=8080
+

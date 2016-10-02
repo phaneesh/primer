@@ -14,40 +14,24 @@
  * limitations under the License.
  */
 
-package io.jwt.primer.config;
+package io.jwt.primer.resource;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.time.Instant;
 
 /**
  * @author phaneesh
  */
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
-public class AerospikeConfig {
+public class ExpiresTest {
 
-    private String hosts;
 
-    private String namespace;
+    @Test
+    public void testExpity() {
+        long adjusted = Instant.ofEpochMilli(1469012219).plusSeconds(60).getEpochSecond();
+        long now = Instant.now().getEpochSecond();
+        Assert.assertTrue(adjusted < now);
 
-    private int maxConnectionsPerNode;
-
-    private int timeout;
-
-    private int retries;
-
-    private int sleepBetweenRetries;
-
-    private int maxSocketIdle = 4140;
-
-    private int threadPoolSize = 512;
-
-    public static class AerospikeConfigBuilder {
-        private int maxSocketIdle = 4140;
-        private int threadPoolSize = 512;
     }
 }

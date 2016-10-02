@@ -19,23 +19,27 @@ package io.jwt.primer.resource;
 import com.codahale.metrics.annotation.Metered;
 import com.github.toastshaman.dropwizard.auth.jwt.hmac.HmacSHA512Signer;
 import com.google.common.base.Charsets;
-import io.jwt.primer.command.*;
+import com.google.common.base.Strings;
+import io.jwt.primer.command.PrimerCommands;
 import io.jwt.primer.config.AerospikeConfig;
 import io.jwt.primer.config.JwtConfig;
 import io.jwt.primer.exception.PrimerException;
 import io.jwt.primer.model.*;
+import io.jwt.primer.util.PrimerExceptionUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 
 import javax.inject.Singleton;
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.time.Instant;
+import java.util.concurrent.ExecutionException;
 
 /**
  * @author phaneesh
@@ -70,16 +74,16 @@ public class TokenResource {
     public TokenResponse generate(@HeaderParam("X-User-Id") String id,
                                   @PathParam("app") String app, @Valid ServiceUser user) throws PrimerException {
         try {
-            GenerateCommand generateCommand = new GenerateCommand(signer, jwtConfig, aerospikeConfig, id, app, user);
-            return generateCommand.queue().get();
+            return PrimerCommands.generateDynamic(aerospikeConfig, app, id, user, jwtConfig, signer);
         } catch (Exception e) {
-            log.error("Error generating token", e);
-            throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR000", e.getMessage());
+            PrimerExceptionUtil.handleException(e);
+            log.error("Execution Error generating token", e);
+            throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR001", "Error");
         }
     }
 
     @POST
-    @Path("/v1/disable/{app}/{id}")
+    @Path("/v1/disableDynamic/{app}/{id}")
     @ApiOperation(value = "Disable a JWT token for given user")
     @ApiResponses({
             @ApiResponse(code = 200, response = TokenDisableResponse.class, message = "Success"),
@@ -89,14 +93,38 @@ public class TokenResource {
     public TokenDisableResponse disable(@PathParam("id") String id,
                                         @PathParam("app") String app) throws PrimerException {
         try {
-            DisableCommand disableCommand = new DisableCommand(aerospikeConfig, app, id);
-            return disableCommand.queue().get();
-        } catch (Exception e) {
-            log.error("Error disabling token", e);
-            if(ExceptionUtils.getRootCause(e) instanceof PrimerException) {
-                throw (PrimerException)ExceptionUtils.getRootCause(e);
+            TokenDisableResponse response = PrimerCommands.disableDynamic(aerospikeConfig, app, id);
+            if(response == null) {
+                throw new PrimerException(Response.Status.NOT_FOUND.getStatusCode(), "PR001", "Not Found");
             }
-            throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR000", e.getMessage());
+            return response;
+        } catch (Exception e) {
+            PrimerExceptionUtil.handleException(e);
+            log.error("Execution Error disabling token", e);
+            throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR001", "Error");
+        }
+    }
+
+    @DELETE
+    @Path("/v1/clearDynamic/{app}/{id}")
+    @ApiOperation(value = "Clear JWT token for given user")
+    @ApiResponses({
+            @ApiResponse(code = 200, response = TokenClearResponse.class, message = "Success"),
+            @ApiResponse(code = 500, response = PrimerError.class, message = "Error"),
+    })
+    @Metered
+    public TokenClearResponse clear(@PathParam("id") String id,
+                                    @PathParam("app") String app) throws PrimerException {
+        try {
+            TokenClearResponse response = PrimerCommands.clearDynamic(aerospikeConfig, app, id);
+            if(response == null) {
+                throw new PrimerException(Response.Status.NOT_FOUND.getStatusCode(), "PR001", "Not Found");
+            }
+            return response;
+        } catch (Exception e) {
+            PrimerExceptionUtil.handleException(e);
+            log.error("Execution Error clearing token", e);
+            throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR001", "Error");
         }
     }
 
@@ -110,16 +138,17 @@ public class TokenResource {
     })
     @Metered
     public TokenExpireResponse expire(@PathParam("id") String id,
-                                        @PathParam("app") String app) throws PrimerException {
+                                      @PathParam("app") String app) throws PrimerException {
         try {
-            ExpireCommand expireCommand = new ExpireCommand(aerospikeConfig, app, id);
-            return expireCommand.queue().get();
-        } catch (Exception e) {
-            log.error("Error disabling token", e);
-            if(ExceptionUtils.getRootCause(e) instanceof PrimerException) {
-                throw (PrimerException)ExceptionUtils.getRootCause(e);
+            TokenExpireResponse response = PrimerCommands.expireDynamic(aerospikeConfig, app, id);
+            if(response == null) {
+                throw new PrimerException(Response.Status.NOT_FOUND.getStatusCode(), "PR001", "Not Found");
             }
-            throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR000", e.getMessage());
+            return response;
+        } catch (Exception e) {
+            PrimerExceptionUtil.handleException(e);
+            log.error("Execution Error disabling token", e);
+            throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR001", "Error");
         }
     }
 
@@ -132,17 +161,17 @@ public class TokenResource {
             @ApiResponse(code = 500, response = PrimerError.class, message = "Error"),
     })
     @Metered
-    public GetTokenResponse get(@PathParam("id") String id,
-                                      @PathParam("app") String app) throws PrimerException {
+    public DynamicToken get(@PathParam("id") String id,
+                            @PathParam("app") String app) throws PrimerException {
         try {
-            GetTokenCommand getTokenCommand = new GetTokenCommand(aerospikeConfig, app, id);
-            return getTokenCommand.queue().get();
+            DynamicToken dynamicToken = PrimerCommands.getDynamic(aerospikeConfig, app, id);
+            if (dynamicToken == null)
+                throw new PrimerException(Response.Status.NOT_FOUND.getStatusCode(), "PR001", "Not Found");
+            return dynamicToken;
         } catch (Exception e) {
-            log.error("Error getting token", e);
-            if(ExceptionUtils.getRootCause(e) instanceof PrimerException) {
-                throw (PrimerException)ExceptionUtils.getRootCause(e);
-            }
-            throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR000", e.getMessage());
+            PrimerExceptionUtil.handleException(e);
+            log.error("Execution Error getting token", e);
+            throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR001", "Error");
         }
     }
 
@@ -161,13 +190,30 @@ public class TokenResource {
     public VerifyResponse verify(@HeaderParam("X-Auth-Token") String token, @PathParam("app") String app,
                                  @PathParam("id") String id, @Valid ServiceUser user) throws PrimerException {
         try {
-            VerifyCommand verifyCommand = new VerifyCommand(aerospikeConfig, jwtConfig, token, id, app, user);
-            return verifyCommand.queue().get();
-        } catch (Exception e) {
-            log.error("Error verifying token", e);
-            if(ExceptionUtils.getRootCause(e) instanceof PrimerException) {
-                throw (PrimerException)ExceptionUtils.getRootCause(e);
+            DynamicToken dynamicToken = PrimerCommands.getDynamic(aerospikeConfig, app, id);
+            if (dynamicToken == null)
+                throw new PrimerException(Response.Status.NOT_FOUND.getStatusCode(), "PR001", "Not Found");
+            if (!dynamicToken.isEnabled()) {
+                throw new PrimerException(Response.Status.FORBIDDEN.getStatusCode(), "PR002", "Forbidden");
             }
+            final long adjusted = Instant.ofEpochSecond(dynamicToken.getExpiresAt().getTime()).plusSeconds(jwtConfig.getClockSkew()).getEpochSecond();
+            final long now = Instant.now().getEpochSecond();
+            if (adjusted <= now) {
+                throw new PrimerException(Response.Status.PRECONDITION_FAILED.getStatusCode(), "PR003", "Expired");
+            }
+            if (token.equals(dynamicToken.getToken()) && user.getId().equals(dynamicToken.getSubject())
+                    && user.getName().equals(dynamicToken.getName()) && user.getRole().equals(dynamicToken.getRole())) {
+                return VerifyResponse.builder()
+                        .expiresAt(dynamicToken.getExpiresAt().getTime())
+                        .token(dynamicToken.getToken())
+                        .userId(dynamicToken.getSubject())
+                        .build();
+            } else {
+                throw new PrimerException(Response.Status.UNAUTHORIZED.getStatusCode(), "PR004", "Unauthorized");
+            }
+        } catch (Exception e) {
+            PrimerExceptionUtil.handleException(e);
+            log.error("Execution Error verifying token", e);
             throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR001", "Error");
         }
     }
@@ -178,18 +224,30 @@ public class TokenResource {
     public RefreshResponse refresh(@HeaderParam("X-Auth-Token") String token,
                                    @HeaderParam("X-Refresh-Token") String refresh, @PathParam("app") String app,
                                    @PathParam("id") String id) throws PrimerException {
-
         try {
-            RefreshCommand refreshCommand = new RefreshCommand(signer, jwtConfig, aerospikeConfig,
-                    id, app, token, refresh);
-            return refreshCommand.queue().get();
-        } catch (Exception e) {
-            log.error("Error refreshing token", e);
-            if(ExceptionUtils.getRootCause(e) instanceof PrimerException) {
-                throw (PrimerException)ExceptionUtils.getRootCause(e);
+            DynamicToken dynamicToken = PrimerCommands.getDynamic(aerospikeConfig, app, id);;
+            if (dynamicToken == null)
+                throw new PrimerException(Response.Status.NOT_FOUND.getStatusCode(), "PR001", "Not Found");
+            if (!dynamicToken.isEnabled()) {
+                throw new PrimerException(Response.Status.FORBIDDEN.getStatusCode(), "PR002", "Forbidden");
             }
+            if (dynamicToken.getToken().equals(token) && dynamicToken.getRefreshToken().equals(refresh)) {
+                return PrimerCommands.refreshDynamic(aerospikeConfig, app, id, dynamicToken, jwtConfig, signer);
+            } else {
+                if (!Strings.isNullOrEmpty(dynamicToken.getPreviousToken()) && !Strings.isNullOrEmpty(dynamicToken.getPreviousRefreshToken())) {
+                    if (dynamicToken.getPreviousToken().equals(token) && dynamicToken.getPreviousRefreshToken().equals(refresh)) {
+                        return PrimerCommands.refreshDynamic(aerospikeConfig, app, id, dynamicToken, jwtConfig, signer);
+                    }
+                }
+                throw new PrimerException(Response.Status.UNAUTHORIZED.getStatusCode(), "PR004", "Unauthorized");
+            }
+        } catch (Exception e) {
+            PrimerExceptionUtil.handleException(e);
+            log.error("Execution Error refreshing token", e);
             throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR001", "Error");
         }
     }
+
+
 
 }

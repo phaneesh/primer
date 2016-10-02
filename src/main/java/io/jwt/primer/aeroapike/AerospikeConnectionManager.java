@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 import java.util.Arrays;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 /**
@@ -40,37 +41,49 @@ public class AerospikeConnectionManager {
 
     public static void init(AerospikeConfig aerospikeConfig) {
         config = aerospikeConfig;
+
+        val hosts = config.getHosts().split(",");
+        val hostAddresses = Arrays.stream(hosts).map(h -> {
+            String host[] = h.split(":");
+            if (host.length == 2) {
+                return new Host(host[0], Integer.parseInt(host[1]));
+            } else {
+                return new Host(host[0], 3000);
+            }
+        }).collect(Collectors.toList());
+
         val readPolicy = new Policy();
         readPolicy.maxRetries = config.getRetries();
         readPolicy.consistencyLevel = ConsistencyLevel.CONSISTENCY_ONE;
-        readPolicy.replica = Replica.RANDOM;
+        readPolicy.replica = Replica.MASTER_PROLES;
         readPolicy.sleepBetweenRetries = config.getSleepBetweenRetries();
         readPolicy.timeout = config.getTimeout();
+        readPolicy.sendKey = true;
 
         val writePolicy = new WritePolicy();
         writePolicy.maxRetries = config.getRetries();
         writePolicy.consistencyLevel = ConsistencyLevel.CONSISTENCY_ALL;
-        writePolicy.replica = Replica.MASTER;
+        writePolicy.replica = Replica.MASTER_PROLES;
         writePolicy.sleepBetweenRetries = config.getSleepBetweenRetries();
+        writePolicy.commitLevel = CommitLevel.COMMIT_ALL;
         writePolicy.timeout = config.getTimeout();
+        writePolicy.sendKey = true;
 
         val clientPolicy = new ClientPolicy();
         clientPolicy.maxConnsPerNode = config.getMaxConnectionsPerNode();
         clientPolicy.readPolicyDefault = readPolicy;
         clientPolicy.writePolicyDefault = writePolicy;
         clientPolicy.failIfNotConnected = true;
+        clientPolicy.maxSocketIdle = config.getMaxSocketIdle();
+        clientPolicy.requestProleReplicas = true;
+        clientPolicy.threadPool = Executors.newFixedThreadPool(config.getThreadPoolSize());
 
-        val hosts = config.getHosts().split(",");
-        val hostAddresses = Arrays.stream(hosts).map( h -> {
-            String host[] = h.split(":");
-            if(host.length == 2) {
-                return new Host(host[0], Integer.parseInt(host[1]));
-            } else {
-                return new Host(host[0], 3000);
-            }
-        }).collect(Collectors.toList());
         client = new AerospikeClient(clientPolicy, hostAddresses.toArray(new Host[0]));
-        log.info("Aerospike connection status: " +client.isConnected());
+        log.info("************************* Nodes *******************************");
+        client.getNodeNames().forEach(n -> log.info("Node: {}", n));
+        log.info("***************************************************************");
+        log.info("Aerospike connection status: " + client.isConnected());
+        log.info("***************************************************************");
     }
 
     public static IAerospikeClient getClient() {
@@ -83,7 +96,7 @@ public class AerospikeConnectionManager {
     }
 
     public static void close() {
-        if(null != client) {
+        if (null != client) {
             client.close();
         }
     }

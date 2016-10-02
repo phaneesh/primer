@@ -14,40 +14,22 @@
  * limitations under the License.
  */
 
-package io.jwt.primer.config;
+package io.jwt.primer.util;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import io.jwt.primer.exception.PrimerException;
+import org.apache.commons.lang.exception.ExceptionUtils;
 
 /**
  * @author phaneesh
  */
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
-public class AerospikeConfig {
+public interface PrimerExceptionUtil {
 
-    private String hosts;
-
-    private String namespace;
-
-    private int maxConnectionsPerNode;
-
-    private int timeout;
-
-    private int retries;
-
-    private int sleepBetweenRetries;
-
-    private int maxSocketIdle = 4140;
-
-    private int threadPoolSize = 512;
-
-    public static class AerospikeConfigBuilder {
-        private int maxSocketIdle = 4140;
-        private int threadPoolSize = 512;
+    static void handleException(Exception e) throws PrimerException {
+        if(e instanceof PrimerException) {
+            throw (PrimerException)e;
+        }
+        if(ExceptionUtils.getRootCause(e) instanceof PrimerException) {
+            throw (PrimerException)ExceptionUtils.getRootCause(e);
+        }
     }
 }

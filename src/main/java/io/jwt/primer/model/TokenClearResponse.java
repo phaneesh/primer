@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.jwt.primer.config;
+package io.jwt.primer.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,26 +28,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AerospikeConfig {
+public class TokenClearResponse {
 
-    private String hosts;
-
-    private String namespace;
-
-    private int maxConnectionsPerNode;
-
-    private int timeout;
-
-    private int retries;
-
-    private int sleepBetweenRetries;
-
-    private int maxSocketIdle = 4140;
-
-    private int threadPoolSize = 512;
-
-    public static class AerospikeConfigBuilder {
-        private int maxSocketIdle = 4140;
-        private int threadPoolSize = 512;
-    }
+    private String userId;
 }

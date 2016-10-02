@@ -17,13 +17,16 @@
 package io.jwt.primer;
 
 import com.codahale.metrics.health.HealthCheck;
-import com.hystrix.configurator.core.HystrixConfigutationFactory;
+import com.hystrix.configurator.core.HystrixConfigurationFactory;
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.discovery.bundle.ServiceDiscoveryBundle;
 import io.dropwizard.discovery.bundle.ServiceDiscoveryConfiguration;
 import io.dropwizard.lifecycle.Managed;
+import io.dropwizard.oor.OorBundle;
+import io.dropwizard.riemann.RiemannBundle;
+import io.dropwizard.riemann.RiemannConfig;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
@@ -32,6 +35,8 @@ import io.jwt.primer.aeroapike.AerospikeConnectionManager;
 import io.jwt.primer.exception.PrimerExceptionMapper;
 import io.jwt.primer.resource.StaticTokenResource;
 import io.jwt.primer.resource.TokenResource;
+import io.jwt.primer.tasks.DeleteDynamicTokensTask;
+import io.jwt.primer.tasks.DeleteStaticTokensTask;
 import org.zapodot.hystrix.bundle.HystrixBundle;
 
 /**
@@ -53,7 +58,9 @@ public class PrimerApp extends Application<PrimerConfiguration> {
                         new EnvironmentVariableSubstitutor()
                 )
         );
-        bootstrap.addBundle(HystrixBundle.withDefaultSettings());
+        bootstrap.addBundle(HystrixBundle.builder()
+                .disableStreamServletInAdminContext()
+                .withApplicationStreamPath("/hystrix.stream").build());
         bootstrap.addBundle(new SwaggerBundle<PrimerConfiguration>() {
             @Override
             protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(PrimerConfiguration configuration) {
@@ -81,11 +88,23 @@ public class PrimerApp extends Application<PrimerConfiguration> {
             }
         };
         bootstrap.addBundle(serviceDiscoveryBundle);
+        bootstrap.addBundle(new RiemannBundle<PrimerConfiguration>() {
+            @Override
+            public RiemannConfig getRiemannConfiguration(PrimerConfiguration apiConfiguration) {
+                return apiConfiguration.getRiemann();
+            }
+        });
+        bootstrap.addBundle(new OorBundle<PrimerConfiguration>() {
+            @Override
+            public boolean withOor() {
+                return false;
+            }
+        });
     }
 
     @Override
     public void run(PrimerConfiguration configuration, Environment environment) throws Exception {
-        HystrixConfigutationFactory.init(configuration.getHystrix());
+        HystrixConfigurationFactory.init(configuration.getHystrix());
         environment.lifecycle().manage(new Managed() {
             @Override
             public void start() throws Exception {
@@ -101,11 +120,13 @@ public class PrimerApp extends Application<PrimerConfiguration> {
             @Override
             protected Result check() throws Exception {
                 return AerospikeConnectionManager.getClient().isConnected() ?
-                        HealthCheck.Result.healthy() : HealthCheck.Result.unhealthy("Aerospike connection error");
+                        Result.healthy() : Result.unhealthy("Aerospike connection error");
             }
         });
         environment.jersey().register(new TokenResource(configuration.getJwt(), configuration.getAerospike()));
         environment.jersey().register(new StaticTokenResource(configuration.getJwt().getPrivateKey(), configuration.getAerospike()));
+        environment.admin().addTask(new DeleteDynamicTokensTask(configuration.getAerospike()));
+        environment.admin().addTask(new DeleteStaticTokensTask(configuration.getAerospike()));
         environment.jersey().register( new PrimerExceptionMapper());
     }
 }

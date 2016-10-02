@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package io.jwt.primer.config;
+package io.jwt.primer.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
+import java.util.Date;
 
 /**
  * @author phaneesh
@@ -28,26 +27,30 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AerospikeConfig {
+@EqualsAndHashCode
+@ToString
+public class DynamicToken {
 
-    private String hosts;
+    private String id;
 
-    private String namespace;
+    private String token;
 
-    private int maxConnectionsPerNode;
+    private String previousToken;
 
-    private int timeout;
+    private String refreshToken;
 
-    private int retries;
+    private String previousRefreshToken;
 
-    private int sleepBetweenRetries;
+    private String subject;
 
-    private int maxSocketIdle = 4140;
+    private String name;
 
-    private int threadPoolSize = 512;
+    private String role;
 
-    public static class AerospikeConfigBuilder {
-        private int maxSocketIdle = 4140;
-        private int threadPoolSize = 512;
-    }
+    private Date issuedAt;
+
+    private Date expiresAt;
+
+    private boolean enabled;
+
 }
