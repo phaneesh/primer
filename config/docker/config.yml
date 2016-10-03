@@ -85,11 +85,3 @@ jwt:
   privateKey: ${JWT_PRIVATE_KEY}
   clockSkew: ${JWT_CLOCK_SKEW}
   expiry: ${JWT_EXPIRY}
-
-discovery:
-  namespace: phonepe
-  environment: ${CONFIG_ENV}
-  zookeeper: ${ZK_CONNECTION_STRING}
-  connectionRetryIntervalMillis: 1000
-  publishedHost: ${HOST}
-  publishedPort: ${PORT_8080}

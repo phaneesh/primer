@@ -58,12 +58,12 @@
         <lombok.maven.version>1.16.10.0</lombok.maven.version>
         <dropwizard.version>1.0.2</dropwizard.version>
         <dropwizard.swagger.version>1.0.0-1</dropwizard.swagger.version>
-        <dropwizard.servicediscovery>1.0.0-SNAPSHOT</dropwizard.servicediscovery>
         <dropwizard.oor>1.0.0-SNAPSHOT</dropwizard.oor>
-        <hystrix.version></hystrix.version>
+        <hystrix.version>1.5.6</hystrix.version>
         <hystrix.dropwizard.version>0.5</hystrix.dropwizard.version>
         <hystrix.configurator.version>0.0.5</hystrix.configurator.version>
         <hystrix.wrapper.version>1.0-SNAPSHOT</hystrix.wrapper.version>
+        <retry.version>2.0.0</retry.version>
         <aerospike.version>3.2.5</aerospike.version>
         <slf4j.version>1.7.19</slf4j.version>
         <aerospike.mock>0.0.5</aerospike.mock>
@@ -125,9 +125,9 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>io.dropwizard.discovery</groupId>
-            <artifactId>dropwizard-service-discovery-bundle</artifactId>
-            <version>${dropwizard.servicediscovery}</version>
+            <groupId>com.github.rholder</groupId>
+            <artifactId>guava-retrying</artifactId>
+            <version>${retry.version}</version>
         </dependency>
         <dependency>
             <groupId>com.hystrix</groupId>

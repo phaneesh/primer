@@ -4,7 +4,7 @@ server:
       port: 8080
   adminConnectors:
     - type: http
-      port: 9081
+      port: 8081
 
 # Logging settings.
 logging:
@@ -23,7 +23,7 @@ swagger:
   description: Low latency & interet scale JWT service
 
 aerospike:
-  hosts: "stg-aerospike001:3000"
+  hosts: "localhost:3000"
   namespace: primer
   maxConnectionsPerNode: 5
   timeout: 1000
@@ -78,11 +78,3 @@ jwt:
   privateKey: TwhjV5ujkvb41frpmqCve7ZfhqwSDMqOXe01DeDIsb2xCrW4bwfFnax9bi2uC9Kn
   clockSkew: 60
   expiry: 600
-
-discovery:
-  namespace: phonepe
-  environment: local
-  zookeeper: localhost:2181
-  connectionRetryIntervalMillis: 1000
-  publishedHost: localhost
-  publishedPort: 8080
