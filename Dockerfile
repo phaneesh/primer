@@ -18,4 +18,4 @@ VOLUME /var/log/primer
 ADD config/docker/config.yml config.yml
 ADD target/primer*.jar primer-service.jar
 
-CMD sh -c "curl -X GET --header 'Accept: application/x-yaml' 'http://'${CONFIG_SERVICE_HOST_PORT}'/v1/phonepe/primer/'${CONFIG_ENV} > ${CONFIG_ENV}.yml && sleep 15; java -jar -XX:+${GC_ALGO-UseG1GC} -Xms${JAVA_PROCESS_MIN_HEAP-1g} -Xmx${JAVA_PROCESS_MAX_HEAP-1g} primer-service.jar server ${CONFIG_ENV}.yml"
+CMD sh -c "sleep 15; java -jar -XX:+${GC_ALGO-UseG1GC} -Xms${JAVA_PROCESS_MIN_HEAP-1g} -Xmx${JAVA_PROCESS_MAX_HEAP-1g} primer-service.jar server config.yml"

@@ -29,15 +29,6 @@ swagger:
   title: Primer
   description: Low latency & interet scale JWT service
 
-riemann:
-  host: ${RIEMANN_HOST}
-  port: ${RIEMANN_PORT}
-  prefix: phonepe.${CONFIG_ENV}.primer
-  pollingInterval: 30
-  tags:
-    - auth
-    - primer
-
 aerospike:
   hosts: ${AEROSPIKE_HOST}
   namespace: ${AEROSPIKE_NAMESPACE}
@@ -46,6 +37,7 @@ aerospike:
   retries: ${AEROSPIKE_RETRIES}
   sleepBetweenRetries: ${AEROSPIKE_SLEEP_BETWEEN_RETRIES}
   maxSocketIdle: ${AEROSPIKE_MAX_SOCKET_IDLE}
+  threadPoolSize: 128
 
 hystrix:
   defaultConfig:

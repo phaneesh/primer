@@ -76,7 +76,7 @@ public class StaticTokenResource {
     }
 
     @POST
-    @Path("/v1/disableDynamic/static/{app}/{id}")
+    @Path("/v1/disable/static/{app}/{id}")
     @ApiOperation(value = "Disable a static JWT token for given user")
     @ApiResponses({
             @ApiResponse(code = 200, response = StaticTokenResponse.class, message = "Success"),

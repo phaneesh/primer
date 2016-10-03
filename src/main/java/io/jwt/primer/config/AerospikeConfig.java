@@ -44,10 +44,10 @@ public class AerospikeConfig {
 
     private int maxSocketIdle = 4140;
 
-    private int threadPoolSize = 512;
+    private int threadPoolSize = 128;
 
     public static class AerospikeConfigBuilder {
         private int maxSocketIdle = 4140;
-        private int threadPoolSize = 512;
+        private int threadPoolSize = 128;
     }
 }
