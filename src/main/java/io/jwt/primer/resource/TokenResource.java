@@ -83,7 +83,7 @@ public class TokenResource {
     }
 
     @POST
-    @Path("/v1/disableDynamic/{app}/{id}")
+    @Path("/v1/disable/dynamic/{app}/{id}")
     @ApiOperation(value = "Disable a JWT token for given user")
     @ApiResponses({
             @ApiResponse(code = 200, response = TokenDisableResponse.class, message = "Success"),
@@ -106,7 +106,7 @@ public class TokenResource {
     }
 
     @DELETE
-    @Path("/v1/clearDynamic/{app}/{id}")
+    @Path("/v1/clear/dynamic/{app}/{id}")
     @ApiOperation(value = "Clear JWT token for given user")
     @ApiResponses({
             @ApiResponse(code = 200, response = TokenClearResponse.class, message = "Success"),
