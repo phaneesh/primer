@@ -31,7 +31,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.exception.ExceptionUtils;
 
 import javax.inject.Singleton;
 import javax.validation.Valid;
@@ -39,7 +38,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.time.Instant;
-import java.util.concurrent.ExecutionException;
 
 /**
  * @author phaneesh
@@ -209,6 +207,9 @@ public class TokenResource {
                         .userId(dynamicToken.getSubject())
                         .build();
             } else {
+                log.error("token_mismatch id:{} request_token:{} db_token:{} request_user_id:{} db_user_id:{} request_user_name:{} db_user_name:{} request_user_role:{} db_user_role:{}",
+                        id, token, dynamicToken.getToken(), user.getId(), dynamicToken.getSubject(),
+                        user.getName(), dynamicToken.getName(), user.getRole(), dynamicToken.getRole());
                 throw new PrimerException(Response.Status.UNAUTHORIZED.getStatusCode(), "PR004", "Unauthorized");
             }
         } catch (Exception e) {
