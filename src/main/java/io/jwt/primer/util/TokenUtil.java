@@ -20,8 +20,10 @@ import com.github.toastshaman.dropwizard.auth.jwt.model.JsonWebToken;
 import com.github.toastshaman.dropwizard.auth.jwt.model.JsonWebTokenClaim;
 import com.github.toastshaman.dropwizard.auth.jwt.model.JsonWebTokenHeader;
 import com.google.common.base.Charsets;
+import com.google.common.base.Joiner;
 import com.google.common.hash.Hashing;
 import io.jwt.primer.config.JwtConfig;
+import io.jwt.primer.model.CustomTokenRequest;
 import io.jwt.primer.model.ServiceUser;
 import lombok.val;
 import org.joda.time.DateTime;
@@ -63,6 +65,24 @@ public class TokenUtil {
                                 .build()
                 ).build();
     }
+
+    public static JsonWebToken token(final String app, final CustomTokenRequest request) {
+        String role = request.getRoles() != null && !request.getRoles().isEmpty() ?
+                request.getRole() +"," + Joiner.on(",").join(request.getRoles()) : request.getRole();
+        JsonWebTokenClaim.Builder builder = JsonWebTokenClaim.builder()
+                .issuedAt(DateTime.now())
+                .issuer(app)
+                .subject(request.getSubject())
+                .expiration(new DateTime(request.getExpiry()))
+                .param("id", request.getId())
+                .param("type", request.getType())
+                .param("role", role);
+        request.getParams().forEach(builder::param);
+        return JsonWebToken.builder()
+                .header(JsonWebTokenHeader.HS512())
+                .claim(builder.build()).build();
+    }
+
 
     public static String refreshToken(final String app, final String id, final JwtConfig jwtConfig,
                                       final JsonWebToken token) {

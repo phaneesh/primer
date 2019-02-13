@@ -33,6 +33,7 @@ import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import io.jwt.primer.aeroapike.AerospikeConnectionManager;
 import io.jwt.primer.exception.PrimerExceptionMapper;
+import io.jwt.primer.resource.CustomTokenResource;
 import io.jwt.primer.resource.StaticTokenResource;
 import io.jwt.primer.resource.TokenResource;
 import io.jwt.primer.tasks.DeleteDynamicTokensTask;
@@ -124,6 +125,7 @@ public class PrimerApp extends Application<PrimerConfiguration> {
             }
         });
         environment.jersey().register(new TokenResource(configuration.getJwt(), configuration.getAerospike()));
+        environment.jersey().register(new CustomTokenResource(configuration.getJwt(), configuration.getAerospike()));
         environment.jersey().register(new StaticTokenResource(configuration.getJwt().getPrivateKey(), configuration.getAerospike()));
         environment.admin().addTask(new DeleteDynamicTokensTask(configuration.getAerospike()));
         environment.admin().addTask(new DeleteStaticTokensTask(configuration.getAerospike()));

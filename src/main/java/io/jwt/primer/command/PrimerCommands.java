@@ -20,7 +20,9 @@ import com.aerospike.client.Bin;
 import com.aerospike.client.Key;
 import com.aerospike.client.Operation;
 import com.aerospike.client.Record;
-import com.github.rholder.retry.*;
+import com.github.rholder.retry.Retryer;
+import com.github.rholder.retry.RetryerBuilder;
+import com.github.rholder.retry.StopStrategies;
 import com.github.toastshaman.dropwizard.auth.jwt.hmac.HmacSHA512Signer;
 import com.github.toastshaman.dropwizard.auth.jwt.model.JsonWebToken;
 import io.appform.core.hystrix.CommandFactory;
@@ -30,8 +32,6 @@ import io.jwt.primer.config.JwtConfig;
 import io.jwt.primer.exception.PrimerException;
 import io.jwt.primer.model.*;
 import io.jwt.primer.util.TokenUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.Date;
 import java.time.Instant;
@@ -42,8 +42,6 @@ import java.util.concurrent.Callable;
  * @author phaneesh
  */
 public interface PrimerCommands {
-
-    Logger log = LoggerFactory.getLogger("PrimerCommands");
 
     Retryer<TokenClearResponse> clearRetryer = RetryerBuilder.<TokenClearResponse>newBuilder()
             .retryIfExceptionOfType(RuntimeException.class)
@@ -220,6 +218,43 @@ public interface PrimerCommands {
             throw new PrimerException(500, "PR000", e.getMessage());
         }
     }
+
+
+    static TokenResponse generateCustom(final AerospikeConfig aerospikeConfig, final String app,
+                                        final CustomTokenRequest request, final JwtConfig jwtConfig,
+                                         final HmacSHA512Signer signer) throws PrimerException {
+        Callable<TokenResponse> callable = () -> {
+            final JsonWebToken token = TokenUtil.token(app, request);
+            final String signedToken = signer.sign(token);
+            final String refreshToken = TokenUtil.refreshToken(app, request.getId(), jwtConfig, token);
+            final Key key = new Key(aerospikeConfig.getNamespace(), String.format("%s_tokens", app), request.getId());
+            final Bin subjectBin = new Bin("subject", request.getSubject());
+            final Bin roleBin = new Bin("role", request.getRole());
+            final Bin nameBin = new Bin("name", request.getName());
+            final Bin tokenBin = new Bin("token", signedToken);
+            final Bin refreshTokenBin = new Bin("refresh_token", refreshToken);
+            final Bin issuedAtBin = new Bin("issued_at", token.claim().issuedAt());
+            final Bin expiresAtBin = new Bin("expires_at", token.claim().expiration());
+            final Bin enabledBin = new Bin("enabled", true);
+            AerospikeConnectionManager.getClient().put(null, key, subjectBin, roleBin, nameBin, tokenBin, refreshTokenBin,
+                    issuedAtBin, expiresAtBin, enabledBin);
+            return TokenResponse.builder()
+                    .token(signedToken)
+                    .refreshToken(refreshToken)
+                    .expiresAt(token.claim().expiration())
+                    .build();
+        };
+        try {
+            return CommandFactory.<TokenResponse>create("Custom", "Generate")
+                    .executor(() -> generateDynamicRetryer.call(callable))
+                    .toObservable()
+                    .toBlocking()
+                    .single();
+        } catch(Exception e) {
+            throw new PrimerException(500, "PR000", e.getMessage());
+        }
+    }
+
 
     static StaticTokenResponse generateStatic(final AerospikeConfig aerospikeConfig, final String app, final String id,
                                    final String role,

@@ -207,9 +207,10 @@ public class TokenResource {
                         .userId(dynamicToken.getSubject())
                         .build();
             } else {
-                log.error("token_mismatch id:{} request_token:{} db_token:{} request_user_id:{} db_user_id:{} request_user_name:{} db_user_name:{} request_user_role:{} db_user_role:{}",
-                        id, token, dynamicToken.getToken(), user.getId(), dynamicToken.getSubject(),
-                        user.getName(), dynamicToken.getName(), user.getRole(), dynamicToken.getRole());
+                log.error("Token_mismatch id: " +id +" | Request Token: " +token +" | DB Token: " +dynamicToken.getToken()
+                        +" | Request User Id: " +user.getId() +" | DB User Id: " +dynamicToken.getSubject()
+                        +" | Request User Name: " +user.getName() +" | DB User Name: " +dynamicToken.getName()
+                        +" | Request User Role: " +user.getRole() +" | DB User Role: " + dynamicToken.getRole());
                 throw new PrimerException(Response.Status.UNAUTHORIZED.getStatusCode(), "PR004", "Unauthorized");
             }
         } catch (Exception e) {

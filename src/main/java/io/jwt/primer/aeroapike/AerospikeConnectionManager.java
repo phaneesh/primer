@@ -57,7 +57,7 @@ public class AerospikeConnectionManager {
         readPolicy.consistencyLevel = ConsistencyLevel.CONSISTENCY_ONE;
         readPolicy.replica = Replica.MASTER_PROLES;
         readPolicy.sleepBetweenRetries = config.getSleepBetweenRetries();
-        readPolicy.timeout = config.getTimeout();
+        readPolicy.totalTimeout = config.getTimeout();
         readPolicy.sendKey = true;
 
         val writePolicy = new WritePolicy();
@@ -66,7 +66,7 @@ public class AerospikeConnectionManager {
         writePolicy.replica = Replica.MASTER_PROLES;
         writePolicy.sleepBetweenRetries = config.getSleepBetweenRetries();
         writePolicy.commitLevel = CommitLevel.COMMIT_ALL;
-        writePolicy.timeout = config.getTimeout();
+        writePolicy.totalTimeout = config.getTimeout();
         writePolicy.sendKey = true;
 
         val clientPolicy = new ClientPolicy();
