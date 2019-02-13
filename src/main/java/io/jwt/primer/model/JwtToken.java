@@ -16,41 +16,51 @@
 
 package io.jwt.primer.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author phaneesh
+ */
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CustomTokenRequest {
+@Builder
+@EqualsAndHashCode
+@ToString
+public class JwtToken {
 
-    @NotNull
     private String id;
 
-    @NotNull
-    private String subject;
+    private String token;
 
-    @NotNull
-    private String name;
-
-    @NotNull
     private String type;
 
-    @NotNull
+    private String previousToken;
+
+    private String refreshToken;
+
+    private String previousRefreshToken;
+
+    private String subject;
+
+    private String name;
+
     private String role;
+
+    private long expiry;
 
     private List<String> roles;
 
-    @NotNull
-    private Date expiry;
-
     private Map<String, Object> params;
+
+    private Date issuedAt;
+
+    private Date expiresAt;
+
+    private boolean enabled;
+
 }

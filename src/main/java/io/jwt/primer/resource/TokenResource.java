@@ -46,7 +46,7 @@ import java.time.Instant;
 @Produces(MediaType.APPLICATION_JSON)
 @Slf4j
 @Singleton
-@Api(value = "Token Management API")
+@Api(value = "Primer Token Management API")
 public class TokenResource {
 
     private final HmacSHA512Signer signer;
@@ -63,7 +63,7 @@ public class TokenResource {
 
     @POST
     @Path("/v1/generate/{app}")
-    @ApiOperation(value = "Generate a JWT token for given user")
+    @ApiOperation(value = "Generate Primer token")
     @ApiResponses({
             @ApiResponse(code = 200, response = TokenResponse.class, message = "Success"),
             @ApiResponse(code = 500, response = PrimerError.class, message = "Error"),
@@ -82,7 +82,7 @@ public class TokenResource {
 
     @POST
     @Path("/v1/disableDynamic/{app}/{id}")
-    @ApiOperation(value = "Disable a JWT token for given user")
+    @ApiOperation(value = "Disable Primer token")
     @ApiResponses({
             @ApiResponse(code = 200, response = TokenDisableResponse.class, message = "Success"),
             @ApiResponse(code = 500, response = PrimerError.class, message = "Error"),
@@ -105,7 +105,7 @@ public class TokenResource {
 
     @DELETE
     @Path("/v1/clearDynamic/{app}/{id}")
-    @ApiOperation(value = "Clear JWT token for given user")
+    @ApiOperation(value = "Clear Primer JWT token for given user")
     @ApiResponses({
             @ApiResponse(code = 200, response = TokenClearResponse.class, message = "Success"),
             @ApiResponse(code = 500, response = PrimerError.class, message = "Error"),
@@ -128,7 +128,7 @@ public class TokenResource {
 
     @POST
     @Path("/v1/expire/{app}/{id}")
-    @ApiOperation(value = "Expire a JWT token for given user")
+    @ApiOperation(value = "Expire Primer token for given user")
     @ApiResponses({
             @ApiResponse(code = 200, response = TokenExpireResponse.class, message = "Success"),
             @ApiResponse(code = 404, response = PrimerError.class, message = "Not Found"),
@@ -152,7 +152,7 @@ public class TokenResource {
 
     @GET
     @Path("/v1/token/{app}/{id}")
-    @ApiOperation(value = "Get a JWT token for given user")
+    @ApiOperation(value = "Get Primer token for given user")
     @ApiResponses({
             @ApiResponse(code = 200, response = GetTokenResponse.class, message = "Success"),
             @ApiResponse(code = 404, response = PrimerError.class, message = "Not Found"),
@@ -175,7 +175,7 @@ public class TokenResource {
 
     @POST
     @Path("/v1/verify/{app}/{id}")
-    @ApiOperation(value = "Verify the token for a given user")
+    @ApiOperation(value = "Verify Primer token for a given user")
     @ApiResponses({
             @ApiResponse(code = 200, response = VerifyResponse.class, message = "Success"),
             @ApiResponse(code = 401, response = PrimerError.class, message = "Unauthorized"),
@@ -222,12 +222,12 @@ public class TokenResource {
 
     @POST
     @Path("/v1/refresh/{app}/{id}")
-    @ApiOperation(value = "Refresh the token for a given user")
+    @ApiOperation(value = "Refresh Primer token for a given user")
     public RefreshResponse refresh(@HeaderParam("X-Auth-Token") String token,
                                    @HeaderParam("X-Refresh-Token") String refresh, @PathParam("app") String app,
                                    @PathParam("id") String id) throws PrimerException {
         try {
-            DynamicToken dynamicToken = PrimerCommands.getDynamic(aerospikeConfig, app, id);;
+            DynamicToken dynamicToken = PrimerCommands.getDynamic(aerospikeConfig, app, id);
             if (dynamicToken == null)
                 throw new PrimerException(Response.Status.NOT_FOUND.getStatusCode(), "PR001", "Not Found");
             if (!dynamicToken.isEnabled()) {
@@ -249,7 +249,4 @@ public class TokenResource {
             throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR001", "Error");
         }
     }
-
-
-
 }
