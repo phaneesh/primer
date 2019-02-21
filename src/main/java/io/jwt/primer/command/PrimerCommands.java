@@ -313,7 +313,7 @@ public interface PrimerCommands {
                     .toBlocking()
                     .single();
         } catch(Exception e) {
-            throw new PrimerException(500, "PR000", e.getMessage());
+            throw new PrimerException(e, 500, "PR000", e.getMessage());
         }
     }
 
