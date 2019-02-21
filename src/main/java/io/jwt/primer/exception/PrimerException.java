@@ -37,11 +37,4 @@ public class PrimerException extends Exception {
     private String errorCode;
 
     private String message;
-
-    public PrimerException(Throwable cause, int status, String errorCode, String message) {
-        super(cause);
-        this.status = status;
-        this.errorCode = errorCode;
-        this.message = message;
-    }
 }
