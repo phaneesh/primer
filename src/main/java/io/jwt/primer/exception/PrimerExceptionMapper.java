@@ -17,7 +17,7 @@
 package io.jwt.primer.exception;
 
 import io.jwt.primer.model.PrimerError;
-import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -26,13 +26,11 @@ import javax.ws.rs.ext.Provider;
 /**
  * @author phaneesh
  */
-@Slf4j
 @Provider
 public class PrimerExceptionMapper implements ExceptionMapper<PrimerException> {
 
     @Override
     public Response toResponse(PrimerException exception) {
-        log.error(String.format("ERROR %s %s %s", exception.getStatus(), exception.getErrorCode(), exception.getMessage()), exception);
         final PrimerError errorData = PrimerError.builder()
                 .errorCode(exception.getErrorCode())
                 .message(exception.getMessage())
