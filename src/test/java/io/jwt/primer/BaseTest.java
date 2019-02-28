@@ -142,7 +142,7 @@ public class BaseTest {
         when(environment.getAdminContext()).thenReturn(new MutableServletContextHandler());
 
         hystrixBundle.initialize(bootstrap);
-        hystrixBundle.run(environment);
+        hystrixBundle.run(config, environment);
 
         HystrixConfigurationFactory.init(config.hystrix);
 
