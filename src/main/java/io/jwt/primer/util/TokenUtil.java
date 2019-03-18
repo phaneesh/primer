@@ -65,16 +65,15 @@ public class TokenUtil {
                 ).build();
     }
 
-    public static JsonWebToken token(final String app, final JwtTokenRequest request) {
+    public static JsonWebToken token(final String app, final JwtTokenRequest request, final JwtConfig jwtConfig) {
         JsonWebTokenClaim.Builder builder = JsonWebTokenClaim.builder()
                 .issuedAt(DateTime.now())
                 .issuer(app)
                 .subject(request.getSubject())
-                .expiration(new DateTime(request.getExpiry()))
+                .expiration(DateTime.now().plusSeconds(jwtConfig.getExpiry()))
                 .param("id", request.getId())
-                .param("type", request.getType())
+                .param("type", "dynamic")
                 .param("role", request.getRole())
-                .param("expiry", request.getExpiry())
                 .param("roles", request.getRoles());
         request.getParams().forEach(builder::param);
         return JsonWebToken.builder()

@@ -32,7 +32,7 @@ riemann:
     - primer
 
 aerospike:
-  hosts: "stg-aerospike001:3000"
+  hosts: "stg-primentaero001.phonepe.nm2:3000"
   namespace: primer
   maxConnectionsPerNode: 5
   timeout: 1000
@@ -80,8 +80,6 @@ hystrix:
       threadPool:
         timeout: 100
         concurrency: 4
-
-staticPrivateKey: Z4PWt27w2qkd2DPOHS3iI7PE8xnPPpvP82NDn3C79OeRJCsmmGmRKoNSXTjsqxrv
 
 jwt:
   privateKey: TwhjV5ujkvb41frpmqCve7ZfhqwSDMqOXe01DeDIsb2xCrW4bwfFnax9bi2uC9Kn

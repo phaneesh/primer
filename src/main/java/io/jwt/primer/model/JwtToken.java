@@ -51,8 +51,6 @@ public class JwtToken {
 
     private String role;
 
-    private long expiry;
-
     private List<String> roles;
 
     private Map<String, Object> params;
