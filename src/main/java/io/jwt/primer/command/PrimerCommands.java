@@ -284,13 +284,13 @@ public interface PrimerCommands {
                                      final JwtTokenRequest request, final JwtConfig jwtConfig,
                                      final HmacSHA512Signer signer) throws PrimerException {
         Callable<TokenResponse> callable = () -> {
-            final JsonWebToken token = TokenUtil.token(app, request);
+            final JsonWebToken token = TokenUtil.token(app, request, jwtConfig);
             final String signedToken = signer.sign(token);
             final String refreshToken = TokenUtil.refreshToken(app, request.getId(), jwtConfig, token);
             final Key key = new Key(aerospikeConfig.getNamespace(), String.format("%s_tokens", app), request.getId());
             final Bin subjectBin = new Bin("subject", request.getSubject());
             final Bin roleBin = new Bin("role", request.getRole());
-            final Bin rolesBin = new Bin("roles", request.getRole());
+            final Bin rolesBin = new Bin("roles", request.getRoles());
             final Bin paramsBin = new Bin("params", request.getParams());
             final Bin nameBin = new Bin("name", request.getName());
             final Bin tokenBin = new Bin("token", signedToken);
@@ -389,9 +389,9 @@ public interface PrimerCommands {
                 return null;
             }
             return JwtToken.builder()
+                    .type("dynamic")
                     .subject(record.getString("subject"))
                     .enabled(record.getBoolean("enabled"))
-                    .expiry(record.getLong("expiry"))
                     .expiresAt(Date.from(Instant.ofEpochSecond(record.getLong("expires_at"))))
                     .id(id)
                     .token(record.getString("token"))
@@ -473,16 +473,14 @@ public interface PrimerCommands {
         Callable<RefreshResponse> callable = () -> {
             final Key key = new Key(aerospikeConfig.getNamespace(), String.format("%s_tokens", app), id);
             final JwtTokenRequest tokenRequest = JwtTokenRequest.builder()
-                        .expiry(token.getExpiry())
                         .id(token.getId())
                         .name(token.getName())
                         .role(token.getRole())
                         .roles(token.getRoles())
-                        .type(token.getType())
                         .subject(token.getSubject())
                         .params(token.getParams())
                     .build();
-            final JsonWebToken newToken = TokenUtil.token(app, tokenRequest);
+            final JsonWebToken newToken = TokenUtil.token(app, tokenRequest, jwtConfig);
             return saveRefreshToken(app, id, jwtConfig, signer, key, newToken, token.getRefreshToken(), token.getToken());
         };
         try {

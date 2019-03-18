@@ -22,7 +22,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -42,15 +41,9 @@ public class JwtTokenRequest {
     private String name;
 
     @NotNull
-    private String type;
-
-    @NotNull
     private String role;
 
     private List<String> roles;
-
-    @NotNull
-    private long expiry;
 
     private Map<String, Object> params;
 }
