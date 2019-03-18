@@ -99,7 +99,11 @@ public class JwtTokenResource {
             } else {
                 if (!Strings.isNullOrEmpty(jwtToken.getPreviousToken()) && !Strings.isNullOrEmpty(jwtToken.getPreviousRefreshToken())) {
                     if (jwtToken.getPreviousToken().equals(token) && jwtToken.getPreviousRefreshToken().equals(refresh)) {
-                        return PrimerCommands.refreshJwt(aerospikeConfig, app, id, jwtToken, jwtConfig, signer);
+                        return RefreshResponse.builder()
+                                .token(jwtToken.getToken())
+                                .refreshToken(jwtToken.getRefreshToken())
+                                .expiresAt(jwtToken.getExpiresAt().getTime())
+                                .build();
                     }
                 }
                 throw new PrimerException(Response.Status.UNAUTHORIZED.getStatusCode(), "PR004", "Unauthorized");
