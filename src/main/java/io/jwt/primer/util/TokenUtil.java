@@ -16,9 +16,11 @@
 
 package io.jwt.primer.util;
 
+import com.github.toastshaman.dropwizard.auth.jwt.JsonWebTokenParser;
 import com.github.toastshaman.dropwizard.auth.jwt.model.JsonWebToken;
 import com.github.toastshaman.dropwizard.auth.jwt.model.JsonWebTokenClaim;
 import com.github.toastshaman.dropwizard.auth.jwt.model.JsonWebTokenHeader;
+import com.github.toastshaman.dropwizard.auth.jwt.parser.DefaultJsonWebTokenParser;
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
 import io.jwt.primer.config.JwtConfig;
@@ -31,6 +33,8 @@ import org.joda.time.DateTime;
  * @author phaneesh
  */
 public class TokenUtil {
+
+    private static final JsonWebTokenParser JWT_PARSER = new DefaultJsonWebTokenParser();
 
     public static JsonWebToken token(final String app, final String id, final ServiceUser serviceUser,
                                      final JwtConfig jwtConfig) {
@@ -90,5 +94,9 @@ public class TokenUtil {
         hasher.putLong(token.claim().expiration());
         hasher.putString(jwtConfig.getPrivateKey(), Charsets.UTF_8);
         return hasher.hash().toString();
+    }
+
+    public static JsonWebToken parse(final String token) {
+        return JWT_PARSER.parse(token);
     }
 }
