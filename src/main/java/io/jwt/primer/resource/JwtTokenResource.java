@@ -72,7 +72,8 @@ public class JwtTokenResource {
     @Metered
     public TokenResponse generate(@PathParam("app") String app, @Valid JwtTokenRequest request) throws PrimerException {
         try {
-            return PrimerCommands.generateJwt(aerospikeConfig, app, request, jwtConfig, signer);
+            JwtToken previousJwt = PrimerCommands.getJwt(aerospikeConfig, app, request.getId());
+            return PrimerCommands.generateJwt(aerospikeConfig, app, request, jwtConfig, signer, previousJwt);
         } catch (Exception e) {
             PrimerExceptionUtil.handleException(e);
             log.error("Execution Error generating token", e);

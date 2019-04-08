@@ -282,7 +282,7 @@ public interface PrimerCommands {
 
     static TokenResponse generateJwt(final AerospikeConfig aerospikeConfig, final String app,
                                      final JwtTokenRequest request, final JwtConfig jwtConfig,
-                                     final HmacSHA512Signer signer) throws PrimerException {
+                                     final HmacSHA512Signer signer, final JwtToken previousJwt) throws PrimerException {
         Callable<TokenResponse> callable = () -> {
             final JsonWebToken token = TokenUtil.token(app, request, jwtConfig);
             final String signedToken = signer.sign(token);
@@ -298,8 +298,11 @@ public interface PrimerCommands {
             final Bin issuedAtBin = new Bin("issued_at", token.claim().issuedAt());
             final Bin expiresAtBin = new Bin("expires_at", token.claim().expiration());
             final Bin enabledBin = new Bin("enabled", true);
+            final Bin previousTokenBin = new Bin("tokenp", previousJwt == null ? null : previousJwt.getToken());
+            final Bin previousRefreshTokenBin = new Bin("refresh_tokenp", previousJwt == null ? null : previousJwt.getRefreshToken());
             AerospikeConnectionManager.getClient().put(null, key, subjectBin, roleBin, rolesBin,
-                    paramsBin, nameBin, tokenBin, refreshTokenBin, issuedAtBin, expiresAtBin, enabledBin);
+                    paramsBin, nameBin, tokenBin, refreshTokenBin, issuedAtBin, expiresAtBin, enabledBin,
+                    previousTokenBin, previousRefreshTokenBin);
             return TokenResponse.builder()
                     .token(signedToken)
                     .refreshToken(refreshToken)
