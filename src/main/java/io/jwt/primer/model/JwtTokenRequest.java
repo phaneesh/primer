@@ -47,5 +47,7 @@ public class JwtTokenRequest {
 
     private List<String> roles;
 
+    private long expiry;
+
     private Map<String, Object> params;
 }

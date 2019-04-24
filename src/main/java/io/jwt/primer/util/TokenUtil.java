@@ -74,7 +74,7 @@ public class TokenUtil {
                 .issuedAt(DateTime.now())
                 .issuer(app)
                 .subject(request.getSubject())
-                .expiration(DateTime.now().plusSeconds(jwtConfig.getExpiry()))
+                .expiration(new DateTime(request.getExpiry()))
                 .param("id", request.getId())
                 .param("type", "dynamic")
                 .param("role", request.getRole())
