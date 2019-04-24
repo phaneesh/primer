@@ -18,6 +18,7 @@ package io.jwt.primer.resource;
 
 import com.codahale.metrics.annotation.Metered;
 import com.github.toastshaman.dropwizard.auth.jwt.hmac.HmacSHA512Signer;
+import com.github.toastshaman.dropwizard.auth.jwt.model.JsonWebToken;
 import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import io.jwt.primer.command.PrimerCommands;
@@ -26,6 +27,7 @@ import io.jwt.primer.config.JwtConfig;
 import io.jwt.primer.exception.PrimerException;
 import io.jwt.primer.model.*;
 import io.jwt.primer.util.PrimerExceptionUtil;
+import io.jwt.primer.util.TokenUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -38,6 +40,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.time.Instant;
+import java.util.Date;
 
 /**
  * @author phaneesh
@@ -194,25 +197,38 @@ public class TokenResource {
             if (!dynamicToken.isEnabled()) {
                 throw new PrimerException(Response.Status.FORBIDDEN.getStatusCode(), "PR002", "Forbidden");
             }
-            final long adjusted = Instant.ofEpochSecond(dynamicToken.getExpiresAt().getTime()).plusSeconds(jwtConfig.getClockSkew()).getEpochSecond();
-            final long now = Instant.now().getEpochSecond();
-            if (adjusted <= now) {
-                throw new PrimerException(Response.Status.PRECONDITION_FAILED.getStatusCode(), "PR003", "Expired");
+            validateExpiry(dynamicToken.getExpiresAt());
+
+            if (user.getId().equals(dynamicToken.getSubject())
+                    && user.getName().equals(dynamicToken.getName())
+                    && user.getRole().equals(dynamicToken.getRole())) {
+
+                if (token.equals(dynamicToken.getToken())) {
+                    return VerifyResponse.builder()
+                            .expiresAt(dynamicToken.getExpiresAt().getTime())
+                            .token(dynamicToken.getToken())
+                            .userId(dynamicToken.getSubject())
+                            .build();
+                }
+
+                if (token.equals(dynamicToken.getPreviousToken())) {
+                    JsonWebToken jsonWebToken = TokenUtil.parse(token);
+                    validateExpiry(new Date(jsonWebToken.claim().expiration() * 1000));
+
+                    return VerifyResponse.builder()
+                            .expiresAt(jsonWebToken.claim().expiration() * 1000)
+                            .token(dynamicToken.getToken())
+                            .userId(dynamicToken.getSubject())
+                            .build();
+                }
             }
-            if (token.equals(dynamicToken.getToken()) && user.getId().equals(dynamicToken.getSubject())
-                    && user.getName().equals(dynamicToken.getName()) && user.getRole().equals(dynamicToken.getRole())) {
-                return VerifyResponse.builder()
-                        .expiresAt(dynamicToken.getExpiresAt().getTime())
-                        .token(dynamicToken.getToken())
-                        .userId(dynamicToken.getSubject())
-                        .build();
-            } else {
-                log.error("Token_mismatch id: " +id +" | Request Token: " +token +" | DB Token: " +dynamicToken.getToken()
-                        +" | Request User Id: " +user.getId() +" | DB User Id: " +dynamicToken.getSubject()
-                        +" | Request User Name: " +user.getName() +" | DB User Name: " +dynamicToken.getName()
-                        +" | Request User Role: " +user.getRole() +" | DB User Role: " + dynamicToken.getRole());
-                throw new PrimerException(Response.Status.UNAUTHORIZED.getStatusCode(), "PR004", "Unauthorized");
-            }
+
+            log.error("Token_mismatch id: " +id +" | Request Token: " +token +" | DB Token: " +dynamicToken.getToken()
+                    +" | Request User Id: " +user.getId() +" | DB User Id: " +dynamicToken.getSubject()
+                    +" | Request User Name: " +user.getName() +" | DB User Name: " +dynamicToken.getName()
+                    +" | Request User Role: " +user.getRole() +" | DB User Role: " + dynamicToken.getRole());
+            throw new PrimerException(Response.Status.UNAUTHORIZED.getStatusCode(), "PR004", "Unauthorized");
+
         } catch (Exception e) {
             PrimerExceptionUtil.handleException(e);
             log.error("Execution Error verifying token", e);
@@ -247,6 +263,14 @@ public class TokenResource {
             PrimerExceptionUtil.handleException(e);
             log.error("Execution Error refreshing token", e);
             throw new PrimerException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "PR001", "Error");
+        }
+    }
+
+    private void validateExpiry(Date expiresAt) throws PrimerException {
+        final long adjusted = Instant.ofEpochMilli(expiresAt.getTime()).plusSeconds(jwtConfig.getClockSkew()).getEpochSecond();
+        final long now = Instant.now().getEpochSecond();
+        if (adjusted <= now) {
+            throw new PrimerException(Response.Status.PRECONDITION_FAILED.getStatusCode(), "PR003", "Expired");
         }
     }
 }

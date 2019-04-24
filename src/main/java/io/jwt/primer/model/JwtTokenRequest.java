@@ -16,6 +16,7 @@
 
 package io.jwt.primer.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,6 +30,7 @@ import java.util.Map;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class JwtTokenRequest {
 
     @NotNull
@@ -44,6 +46,8 @@ public class JwtTokenRequest {
     private String role;
 
     private List<String> roles;
+
+    private long expiry;
 
     private Map<String, Object> params;
 }
