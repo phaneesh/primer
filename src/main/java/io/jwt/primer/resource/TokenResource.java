@@ -267,7 +267,7 @@ public class TokenResource {
     }
 
     private void validateExpiry(Date expiresAt) throws PrimerException {
-        final long adjusted = Instant.ofEpochSecond(expiresAt.getTime() / 1000).plusSeconds(jwtConfig.getClockSkew()).getEpochSecond();
+        final long adjusted = Instant.ofEpochMilli(expiresAt.getTime()).plusSeconds(jwtConfig.getClockSkew()).getEpochSecond();
         final long now = Instant.now().getEpochSecond();
         if (adjusted <= now) {
             throw new PrimerException(Response.Status.PRECONDITION_FAILED.getStatusCode(), "PR003", "Expired");
