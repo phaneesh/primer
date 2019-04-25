@@ -35,6 +35,7 @@ import io.jwt.primer.util.TokenUtil;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -404,7 +405,7 @@ public interface PrimerCommands {
                     .refreshToken(record.getString("refresh_token"))
                     .previousRefreshToken(record.getString("refresh_tokenp"))
                     .role(record.getString("role"))
-                    .roles((List<String>) record.getList("roles"))
+                    .roles(getRolesList(record))
                     .params((Map<String, Object>) record.getMap("params"))
                     .build();
         };
@@ -523,5 +524,12 @@ public interface PrimerCommands {
                 .build();
     }
 
+    static List<String> getRolesList(final Record record) {
+        Object roles = record.getValue("roles");
+        if (roles instanceof List)
+            return (List<String>) roles;
+        else
+            return Collections.emptyList();
+    }
 
 }
