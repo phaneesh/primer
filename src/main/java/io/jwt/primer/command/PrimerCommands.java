@@ -33,9 +33,9 @@ import io.jwt.primer.exception.PrimerException;
 import io.jwt.primer.model.*;
 import io.jwt.primer.util.TokenUtil;
 
-import java.sql.Date;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -284,7 +284,7 @@ public interface PrimerCommands {
                                      final JwtTokenRequest request, final JwtConfig jwtConfig,
                                      final HmacSHA512Signer signer, final JwtToken previousJwt) throws PrimerException {
         Callable<TokenResponse> callable = () -> {
-            final JsonWebToken token = TokenUtil.token(app, request, jwtConfig);
+            final JsonWebToken token = TokenUtil.token(app, request);
             final String signedToken = signer.sign(token);
             final String refreshToken = TokenUtil.refreshToken(app, request.getId(), jwtConfig, token);
             final Key key = new Key(aerospikeConfig.getNamespace(), String.format("%s_tokens", app), request.getId());
@@ -481,9 +481,11 @@ public interface PrimerCommands {
                         .role(token.getRole())
                         .roles(token.getRoles())
                         .subject(token.getSubject())
+                        // Renew for additional time with the same Expiry duration as before.
+                        .expiry(new Date().getTime() + (token.getExpiresAt().getTime() - token.getIssuedAt().getTime()))
                         .params(token.getParams())
                     .build();
-            final JsonWebToken newToken = TokenUtil.token(app, tokenRequest, jwtConfig);
+            final JsonWebToken newToken = TokenUtil.token(app, tokenRequest);
             return saveRefreshToken(app, id, jwtConfig, signer, key, newToken, token.getRefreshToken(), token.getToken());
         };
         try {
