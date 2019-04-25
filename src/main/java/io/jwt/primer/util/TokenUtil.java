@@ -69,7 +69,7 @@ public class TokenUtil {
                 ).build();
     }
 
-    public static JsonWebToken token(final String app, final JwtTokenRequest request, final JwtConfig jwtConfig) {
+    public static JsonWebToken token(final String app, final JwtTokenRequest request) {
         JsonWebTokenClaim.Builder builder = JsonWebTokenClaim.builder()
                 .issuedAt(DateTime.now())
                 .issuer(app)
