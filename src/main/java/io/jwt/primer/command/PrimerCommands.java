@@ -524,12 +524,16 @@ public interface PrimerCommands {
                 .build();
     }
 
+    /**
+     * Helper method to correctly read the data from roles bin.
+     * Due to a bug, the data in roles bin for some users have been set as String instead of List.
+     *
+     * @param record
+     * @return List of roles
+     */
     static List<String> getRolesList(final Record record) {
         Object roles = record.getValue("roles");
-        if (roles instanceof List)
-            return (List<String>) roles;
-        else
-            return Collections.emptyList();
+        return (roles instanceof List) ? (List<String>) roles : Collections.emptyList();
     }
 
 }
