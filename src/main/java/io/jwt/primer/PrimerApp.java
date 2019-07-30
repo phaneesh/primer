@@ -18,6 +18,7 @@ package io.jwt.primer;
 
 import com.codahale.metrics.health.HealthCheck;
 import com.hystrix.configurator.core.HystrixConfigurationFactory;
+import com.phonepe.rosey.dwconfig.RoseyConfigSourceProvider;
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
@@ -55,10 +56,9 @@ public class PrimerApp extends Application<PrimerConfiguration> {
     @Override
     public void initialize(final Bootstrap<PrimerConfiguration> bootstrap) {
         bootstrap.setConfigurationSourceProvider(
-                new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(),
-                        new EnvironmentVariableSubstitutor()
-                )
-        );
+            new SubstitutingSourceProvider(new RoseyConfigSourceProvider("platform",
+            "primer"),
+            new EnvironmentVariableSubstitutor()));
         bootstrap.addBundle(HystrixBundle.builder()
                 .disableStreamServletInAdminContext()
                 .withApplicationStreamPath("/hystrix.stream").build());
